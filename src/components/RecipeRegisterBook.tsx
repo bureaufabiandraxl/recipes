@@ -6,10 +6,10 @@ import {
   CircleUser,
   Clock3,
   Cookie,
-  Crosshair,
   ImageIcon,
   Info,
   Martini,
+  Minimize2,
   Minus,
   Plus,
   ReceiptText,
@@ -61,6 +61,8 @@ interface DragState {
   startX: number;
   startY: number;
   startPosition: BoardPosition;
+  itemWidth: number;
+  itemHeight: number;
   moved: boolean;
 }
 
@@ -230,7 +232,27 @@ function getRecipeCategoryLabel(recipe: Recipe) {
 }
 
 function getDifficultyLabel(recipe: Recipe) {
-  return recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1);
+  if (recipe.difficulty === "mittel") {
+    return "Fortgeschritten";
+  }
+
+  if (recipe.difficulty === "anspruchsvoll") {
+    return "Nonna";
+  }
+
+  return "Einfach";
+}
+
+function getDifficultyLevel(recipe: Recipe) {
+  if (recipe.difficulty === "anspruchsvoll") {
+    return 3;
+  }
+
+  if (recipe.difficulty === "mittel") {
+    return 2;
+  }
+
+  return 1;
 }
 
 function formatAmount(amount: number, multiplier: number) {
@@ -388,6 +410,10 @@ function getItemTopPx(position: BoardPosition) {
   return Math.round(registerPagePadding + (position.y / 100) * registerContentHeight);
 }
 
+function getItemYFromTopPx(top: number) {
+  return ((top - registerPagePadding) / registerContentHeight) * 100;
+}
+
 function getRegisterPageHeight(requiredHeight: number) {
   const contentHeight = Math.max(0, requiredHeight - registerPagePadding * 2);
 
@@ -498,11 +524,6 @@ function ZoomableImage({
   function resetZoom() {
     resetInteraction();
     setTransform({ scale: 1, x: 0, y: 0 });
-  }
-
-  function centerImage() {
-    resetInteraction();
-    setTransform((current) => ({ ...current, x: 0, y: 0 }));
   }
 
   function changeZoom(multiplier: number) {
@@ -635,8 +656,8 @@ function ZoomableImage({
         <button aria-label="Verkleinern" onClick={() => changeZoom(0.82)} type="button">
           <Minus aria-hidden="true" size={17} strokeWidth={2.2} />
         </button>
-        <button aria-label="Zentrieren" onClick={centerImage} type="button">
-          <Crosshair aria-hidden="true" size={17} strokeWidth={2.1} />
+        <button aria-label="Zoom zurücksetzen und zentrieren" onClick={resetZoom} type="button">
+          <Minimize2 aria-hidden="true" size={17} strokeWidth={2.1} />
         </button>
         <button aria-label="Vergrößern" onClick={() => changeZoom(1.22)} type="button">
           <Plus aria-hidden="true" size={17} strokeWidth={2.2} />
@@ -671,16 +692,15 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
       return 1117;
     }
 
-    const lowestItemHeight = Math.max(
+    const defaultLayoutHeight = Math.max(
       ...boardItems.map((item) => {
-        const position = positions[item.id] ?? item.position;
-        return getItemTopPx(position) + getEstimatedItemHeight(item) + registerPagePadding;
+        return getItemTopPx(item.position) + getEstimatedItemHeight(item) + registerPagePadding;
       }),
     );
     const densityHeight = registerPageBaseHeight + Math.max(0, Math.ceil(boardItems.length / 2) - 2) * 260;
 
-    return getRegisterPageHeight(Math.max(registerPageBaseHeight, lowestItemHeight, densityHeight));
-  }, [boardItems, isSpecialRegisterPage, positions]);
+    return getRegisterPageHeight(Math.max(registerPageBaseHeight, defaultLayoutHeight, densityHeight));
+  }, [boardItems, isSpecialRegisterPage]);
 
   function getItemPosition(item: BoardItem) {
     return positions[item.id] ?? item.position;
@@ -702,12 +722,16 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
       return;
     }
 
+    const itemRect = event.currentTarget.getBoundingClientRect();
+
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = {
       id: item.id,
       startX: event.clientX,
       startY: event.clientY,
       startPosition: getItemPosition(item),
+      itemWidth: itemRect.width,
+      itemHeight: itemRect.height,
       moved: false,
     };
   }
@@ -721,8 +745,20 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
     }
 
     const boardRect = board.getBoundingClientRect();
+    const isMobileLayout = window.matchMedia("(max-width: 700px)").matches;
+    const lineInset = 16;
+    const mobileHorizontalBleed = Math.min(56, drag.itemWidth * 0.22);
+    const minLeftPx = isMobileLayout ? -mobileHorizontalBleed : lineInset;
+    const maxLeftPx = isMobileLayout
+      ? boardRect.width - drag.itemWidth + mobileHorizontalBleed
+      : boardRect.width - lineInset - drag.itemWidth;
+    const canvasHeight = board.scrollHeight || boardRect.height;
+    const minTopPx = registerPagePadding;
+    const maxTopPx = Math.max(minTopPx, canvasHeight - registerPagePadding - drag.itemHeight);
     const deltaX = event.clientX - drag.startX;
     const deltaY = event.clientY - drag.startY;
+    const nextLeftPx = (drag.startPosition.x / 100) * boardRect.width + deltaX;
+    const nextTopPx = getItemTopPx(drag.startPosition) + deltaY;
 
     if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
       drag.moved = true;
@@ -731,8 +767,8 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
     setPositions((current) => ({
       ...current,
       [drag.id]: {
-        x: clamp(drag.startPosition.x + (deltaX / boardRect.width) * 100, 1, 74),
-        y: clamp(drag.startPosition.y + (deltaY / registerContentHeight) * 100, 0, 120),
+        x: (clamp(nextLeftPx, minLeftPx, Math.max(minLeftPx, maxLeftPx)) / boardRect.width) * 100,
+        y: getItemYFromTopPx(clamp(nextTopPx, minTopPx, maxTopPx)),
       },
     }));
   }
@@ -840,15 +876,15 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
                       src="/images/brand/marianne.svg"
                       width={44}
                     />
-                    <span className="register-cover-rule" aria-hidden="true" />
+                    <span className="register-cover-rule register-cover-rule-1" aria-hidden="true" />
+                    <span className="register-cover-rule register-cover-rule-2" aria-hidden="true" />
+                    <span className="register-cover-rule register-cover-rule-3" aria-hidden="true" />
+                    <span className="register-cover-rule register-cover-rule-4" aria-hidden="true" />
                     <p>
-                      Eine Sammlung der
-                      <br />
-                      handgeschriebenen Original-
+                      Eine Sammlung der handgeschriebenen Original-
                       <br />
                       rezepte meiner Oma.
                     </p>
-                    <span className="register-cover-rule" aria-hidden="true" />
                     <strong>fabiandraxl.com</strong>
                   </div>
                 </section>
@@ -981,12 +1017,6 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
           className="recipe-detail-backdrop"
           onClick={() => setSelectedItem(null)}
           role="presentation"
-          style={
-            {
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-            } as CSSProperties
-          }
         >
           <article
             className="recipe-detail-sheet"
@@ -994,6 +1024,7 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
           >
             {selectedItem.kind === "recipe" ? (
               <RecipeDetail
+                color={selectedItem.color}
                 onClose={() => setSelectedItem(null)}
                 recipe={selectedItem.recipe}
               />
@@ -1007,27 +1038,15 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
   );
 }
 
-function getRecipeViewColor(recipe: Recipe) {
-  if (recipe.slug === "eierlikoer") {
-    return "#deffc8";
-  }
-
-  if (recipe.slug === "kirchtagskrapfen") {
-    return "#fff36e";
-  }
-
-  if (recipe.slug === "lebkuchen") {
-    return "#e3fdff";
-  }
-
-  if (recipe.slug === "spritzgebaeck") {
-    return "#ffefe1";
-  }
-
-  return "#fec8ff";
-}
-
-function RecipeDetail({ onClose, recipe }: { onClose: () => void; recipe: Recipe }) {
+function RecipeDetail({
+  color,
+  onClose,
+  recipe,
+}: {
+  color: string;
+  onClose: () => void;
+  recipe: Recipe;
+}) {
   const [servings, setServings] = useState(recipe.servingsDefault);
   const servingsMultiplier = servings / recipe.servingsDefault;
   const RecipeIcon = recipe.slug === "eierlikoer" ? Martini : Cookie;
@@ -1041,7 +1060,7 @@ function RecipeDetail({ onClose, recipe }: { onClose: () => void; recipe: Recipe
   return (
     <div
       className="recipe-view-card"
-      style={{ "--recipe-view-bg": getRecipeViewColor(recipe) } as CSSProperties}
+      style={{ "--recipe-view-bg": color } as CSSProperties}
     >
       <header className="recipe-view-toolbar">
         <div className="recipe-view-toolbar-group">
@@ -1095,12 +1114,21 @@ function RecipeDetail({ onClose, recipe }: { onClose: () => void; recipe: Recipe
               {getCardTimeLabel(recipe)}
             </span>
             <span>
-              <span className="recipe-difficulty-icons" aria-hidden="true">
-                <ChefHat size={16} strokeWidth={1.9} />
-                <ChefHat size={16} strokeWidth={1.9} />
-                <ChefHat size={16} strokeWidth={1.9} />
-              </span>
               {getDifficultyLabel(recipe)}
+              <span className="recipe-difficulty-icons" aria-hidden="true">
+                {[1, 2, 3].map((level) => (
+                  <ChefHat
+                    className={
+                      level <= getDifficultyLevel(recipe)
+                        ? "recipe-difficulty-icon-active"
+                        : "recipe-difficulty-icon-muted"
+                    }
+                    key={level}
+                    size={18}
+                    strokeWidth={1.9}
+                  />
+                ))}
+              </span>
             </span>
             <span>
               <RecipeIcon aria-hidden="true" size={18} strokeWidth={1.9} />
@@ -1116,7 +1144,7 @@ function RecipeDetail({ onClose, recipe }: { onClose: () => void; recipe: Recipe
         <div className="recipe-detail-sections">
           <section className="recipe-content-panel recipe-ingredients-panel">
             <div className="recipe-panel-header">
-              <h2>Zutaten</h2>
+              <h2>Zutaten für:</h2>
               <div className="servings-controls" aria-label="Portionen anpassen">
                 <button
                   aria-label="Eine Portion weniger"
@@ -1141,19 +1169,21 @@ function RecipeDetail({ onClose, recipe }: { onClose: () => void; recipe: Recipe
                   <span>
                     {formatAmount(ingredient.amount, servingsMultiplier)} {ingredient.unit}
                   </span>
-                  <strong>{ingredient.name}</strong>
-                  {ingredient.note ? <small>{ingredient.note}</small> : null}
+                  <div className="recipe-ingredient-text">
+                    <strong>{ingredient.name}{ingredient.note ? "," : ""}</strong>
+                    {ingredient.note ? <small> {ingredient.note}</small> : null}
+                  </div>
                 </li>
               ))}
             </ul>
           </section>
 
           <section className="recipe-content-panel">
-            <h2>Zubereitung</h2>
+            <h2>Zubereitung:</h2>
             <ol className="recipe-step-list">
               {recipe.steps.map((step) => (
                 <li key={step.number}>
-                  <span>{step.number}</span>
+                  <span>{step.number}.</span>
                   <p>{step.instruction}</p>
                 </li>
               ))}
@@ -1161,7 +1191,7 @@ function RecipeDetail({ onClose, recipe }: { onClose: () => void; recipe: Recipe
           </section>
 
           <section className="recipe-content-panel recipe-tips-panel">
-            <h2>Tipps</h2>
+            <h2>Tipps:</h2>
             <div className="recipe-tip-list">
               {recipe.tips.map((tip) => (
                 <p key={tip}>{tip}</p>

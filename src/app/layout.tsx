@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "Mariannes Rezept-Schatz",
   description:
     "Handschriftliche Rezeptkarten aus Omas Küche – neu interpretiert und modern umgesetzt.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
