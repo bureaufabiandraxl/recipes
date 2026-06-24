@@ -605,12 +605,12 @@ select {
 }
 
 .register-left-tab-filled {
-  color: #c5303e;
+  color: #181816;
 }
 
 .register-left-tab-active {
   background: var(--register-paper);
-  color: #c5303e;
+  color: #181816;
   box-shadow: none;
 }
 
@@ -906,14 +906,24 @@ select {
   position: relative;
   z-index: 5;
   display: flex;
+  max-height: 100%;
+  min-height: 0;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 1px;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--register-rail);
+  overscroll-behavior: contain;
+  padding-bottom: 16px;
   padding-right: 8px;
   padding-top: 16px;
+  scrollbar-width: none;
+}
+
+.register-side-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .register-side-tabs::before {
@@ -995,7 +1005,7 @@ select {
 }
 
 .register-side-tab-filled {
-  color: #c5303e;
+  color: #181816;
 }
 
 .register-side-tab-intro.register-side-tab-filled,
@@ -1003,11 +1013,17 @@ select {
   color: #fffffa;
 }
 
+.register-side-tab-disabled {
+  color: rgba(0, 0, 0, 0.2);
+  cursor: default;
+  opacity: 1;
+}
+
 .register-side-tab-active {
   --tab-fill: var(--register-paper);
   position: relative;
   z-index: 80;
-  color: #c5303e;
+  color: #181816;
   box-shadow: none;
 }
 
@@ -1990,7 +2006,13 @@ select {
   }
 
   .register-mobile-tab-filled {
-    color: #c5303e;
+    color: #181816;
+  }
+
+  .register-mobile-tab-disabled {
+    color: rgba(0, 0, 0, 0.2);
+    cursor: default;
+    opacity: 1;
   }
 
   .register-mobile-tab-intro,
@@ -2013,7 +2035,7 @@ select {
   .register-mobile-tab-active {
     --tab-fill: var(--register-paper);
     z-index: 90;
-    color: #c5303e;
+    color: #181816;
   }
 
   .register-mobile-tab-intro.register-mobile-tab-active {

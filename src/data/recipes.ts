@@ -247,27 +247,6 @@ export const registerLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I/J", "
 
 export const collectedBookItems: CollectedBookItem[] = [
   {
-    id: "note-1",
-    registerLetter: "B",
-    type: "notiz",
-    title: "Bleistiftnotiz ohne Rezept",
-    description: "„Butter nie direkt aus dem Keller nehmen“ - eine kleine Küchenregel zwischen zwei leeren Linien.",
-  },
-  {
-    id: "photo-1",
-    registerLetter: "F",
-    type: "bild",
-    title: "Foto vom gedeckten Tisch",
-    description: "Ein lose eingelegtes Familienfoto, vermutlich von einem Feiertag mit zu vielen Tellern und zu wenig Platz.",
-  },
-  {
-    id: "scrap-1",
-    registerLetter: "M",
-    type: "fundstueck",
-    title: "Ausgerissener Merkzettel",
-    description: "Eine Einkaufsliste mit Zucker, Germ, Kaffee und dem Zusatz „nicht vergessen: Besuch kommt“.",
-  },
-  {
     id: "marianne-portrait",
     registerLetter: "M",
     type: "bild",

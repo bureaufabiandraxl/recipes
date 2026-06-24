@@ -687,6 +687,12 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
   }
 
   function handleLetterChange(letter: string) {
+    const nextEntry = registerEntries.find((entry) => entry.id === letter);
+
+    if (!nextEntry || !registerEntryHasContent(nextEntry, lettersWithEntries)) {
+      return;
+    }
+
     setActiveLetter(letter);
     setSelectedItem(null);
   }
@@ -769,11 +775,14 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
                   "register-mobile-tab",
                   entry.label.length > 1 ? "register-mobile-tab-wide" : "",
                   hasEntry ? "register-mobile-tab-filled" : "",
+                  !hasEntry ? "register-mobile-tab-disabled" : "",
                   entry.type === "intro" ? "register-mobile-tab-intro" : "",
                   entry.type === "info" ? "register-mobile-tab-info" : "",
                   activeLetter === entry.id ? "register-mobile-tab-active" : "",
                 ].join(" ")}
                 aria-label={ariaLabel}
+                aria-disabled={!hasEntry}
+                disabled={!hasEntry}
                 key={entry.id}
                 onClick={() => handleLetterChange(entry.id)}
                 style={
@@ -845,15 +854,7 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
                 </section>
               ) : activeRegisterEntry?.type === "info" ? (
                 <InfoRegisterPage />
-              ) : boardItems.length === 0 ? (
-                <div className="empty-register-card">
-                  <span>Register {activeLetter}</span>
-                  <p>
-                    Diese Seite ist noch leer. Genau solche freien Linien machen Omas Buch
-                    glaubwürdig: Platz für das nächste Rezept, einen Zettel oder ein Foto.
-                  </p>
-                </div>
-              ) : (
+              ) : boardItems.length === 0 ? null : (
                 boardItems.map((item) => {
                   const position = getItemPosition(item);
 
@@ -936,9 +937,12 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
                     `register-side-tab-${entry.type}`,
                     entry.label.length > 1 ? "register-side-tab-wide" : "",
                     hasEntry ? "register-side-tab-filled" : "",
+                    !hasEntry ? "register-side-tab-disabled" : "",
                     activeLetter === entry.id ? "register-side-tab-active" : "",
                   ].join(" ")}
                   aria-label={ariaLabel}
+                  aria-disabled={!hasEntry}
+                  disabled={!hasEntry}
                   key={entry.id}
                   onClick={() => handleLetterChange(entry.id)}
                   style={
