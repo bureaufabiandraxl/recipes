@@ -18,6 +18,53 @@
   --framer-cyan: #e3fdff;
   --framer-pink: #ffb5e5;
   --framer-orange: #ff9e66;
+  --liquid-glass-bg: rgba(255, 255, 255, 0.48);
+  --liquid-glass-bg-active: rgba(255, 255, 255, 0.82);
+  --liquid-glass-border: rgba(255, 255, 255, 0.34);
+  --liquid-glass-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  --liquid-glass-filter: blur(20px) saturate(1.16);
+}
+
+.recipe-view-toolbar,
+.recipe-view-chip,
+.zoomable-image-controls,
+.recipe-view-mode-switch,
+.recipe-view-intro,
+.recipe-content-panel,
+.recipe-detail-facts > span,
+.servings-controls,
+.artifact-view-toolbar,
+.artifact-view-chip,
+.artifact-view-caption {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3) !important;
+  background-clip: padding-box;
+  backdrop-filter: var(--liquid-glass-filter) !important;
+  -webkit-backdrop-filter: var(--liquid-glass-filter) !important;
+  transform: translateZ(0);
+}
+
+.recipe-view-toolbar::after,
+.recipe-view-chip::after,
+.zoomable-image-controls::after,
+.recipe-view-mode-switch::after,
+.recipe-view-intro::after,
+.recipe-content-panel::after,
+.recipe-detail-facts > span::after,
+.servings-controls::after,
+.artifact-view-toolbar::after,
+.artifact-view-chip::after,
+.artifact-view-caption::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--liquid-glass-bg);
+  content: "";
+  pointer-events: none;
+  transform: translateZ(0);
 }
 
 @theme inline {
@@ -41,7 +88,12 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-anita-sans), system-ui, sans-serif;
+  font-synthesis: none;
+  font-synthesis-style: none;
+  font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
   overflow-x: hidden;
 }
 
@@ -242,7 +294,7 @@ select {
 .page-turn-button {
   border: 1px solid rgba(58, 48, 35, 0.14);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.58);
+  background: var(--liquid-glass-bg);
   color: #2c2924;
   font-size: 0.74rem;
   font-weight: 680;
@@ -250,12 +302,15 @@ select {
   padding: 9px 14px;
   text-transform: uppercase;
   transition: background 160ms ease, transform 160ms ease, border-color 160ms ease;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .close-book-button:hover,
 .page-turn-button:hover {
   border-color: rgba(58, 48, 35, 0.24);
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--liquid-glass-bg-active);
   transform: translateY(-1px);
 }
 
@@ -302,11 +357,13 @@ select {
 .empty-register-note {
   border: 1px solid rgba(82, 70, 48, 0.12);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.52);
+  background: var(--liquid-glass-bg);
   color: #5d503f;
   line-height: 1.65;
   padding: 15px;
   box-shadow: 0 10px 26px rgba(75, 55, 28, 0.06);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .taped-note {
@@ -314,7 +371,7 @@ select {
 }
 
 .paper-snippet {
-  background: rgba(255, 255, 255, 0.42);
+  background: var(--liquid-glass-bg);
 }
 
 .page-recipe-list {
@@ -344,7 +401,7 @@ select {
 }
 
 .rotate-note {
-  background: rgba(255, 255, 255, 0.44);
+  background: var(--liquid-glass-bg);
 }
 
 .side-register {
@@ -369,10 +426,12 @@ select {
 }
 
 .register-tab-active {
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--liquid-glass-bg);
   color: #9a2f2f;
   transform: translateX(-5px);
-  box-shadow: -5px 4px 14px rgba(75, 55, 28, 0.08);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 @media (max-width: 1020px) {
@@ -431,9 +490,12 @@ select {
     min-height: 34px;
     border: 1px solid rgba(123, 114, 99, 0.18);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.42);
+    background: var(--liquid-glass-bg);
     color: #4f4a43;
     font-size: 0.78rem;
+    box-shadow: var(--liquid-glass-shadow);
+    backdrop-filter: var(--liquid-glass-filter);
+    -webkit-backdrop-filter: var(--liquid-glass-filter);
     font-weight: 650;
     padding-inline: 10px;
     white-space: nowrap;
@@ -622,10 +684,15 @@ select {
 
 .recipe-register-paper {
   min-height: 0;
-  overflow: auto;
+  overflow: hidden auto;
   background: var(--register-paper);
   padding-inline: 0;
-  scrollbar-color: rgba(37, 37, 32, 0.28) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.recipe-register-paper::-webkit-scrollbar {
+  display: none;
 }
 
 .recipe-register-canvas {
@@ -695,9 +762,13 @@ select {
   transform: rotate(var(--card-rotation));
   transition:
     box-shadow 180ms ease,
+    filter 180ms ease,
     transform 180ms ease;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   isolation: isolate;
+  will-change: transform;
 }
 
 .register-board-card:not(.register-board-artifact)::before {
@@ -707,11 +778,21 @@ select {
 .register-board-card:hover,
 .register-board-card:focus-visible {
   outline: none;
-  transform: rotate(var(--card-rotation)) translateY(-4px) scale(1.01);
+  transform: rotate(0deg) translateY(-4px) scale(1.01);
   box-shadow: 0 14px 28px rgba(34, 31, 27, 0.12);
 }
 
 .register-board-card:active {
+  cursor: grabbing;
+}
+
+.register-board-card-dragging,
+.register-board-card-dragging:hover,
+.register-board-card-dragging:focus-visible {
+  transition: none;
+  transform: rotate(var(--card-rotation)) translate3d(0, 0, 0);
+  box-shadow: none;
+  filter: none;
   cursor: grabbing;
 }
 
@@ -726,11 +807,19 @@ select {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   box-shadow: none;
+  filter: none;
 }
 
 .register-board-artifact:hover,
 .register-board-artifact:focus-visible {
   box-shadow: none;
+  filter: none;
+}
+
+.register-board-artifact.register-board-card-dragging,
+.register-board-artifact.register-board-card-dragging:hover,
+.register-board-artifact.register-board-card-dragging:focus-visible {
+  filter: none;
 }
 
 .register-board-artifact.artifact-note {
@@ -754,7 +843,6 @@ select {
   min-height: auto;
   padding: 0;
   background: transparent;
-  filter: drop-shadow(0 10px 18px rgba(34, 31, 27, 0.16));
   box-shadow: none;
 }
 
@@ -785,11 +873,36 @@ select {
 .artifact-packaging-image .register-card-image img,
 .artifact-portrait-image .register-card-image img {
   padding: 0;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.05));
   object-fit: cover;
+  transition: filter 180ms ease;
+  will-change: filter;
 }
 
 .artifact-packaging-image .register-card-image img {
   object-fit: contain;
+}
+
+.artifact-icon-image:hover .register-card-image img,
+.artifact-icon-image:focus-visible .register-card-image img,
+.artifact-packaging-image:hover .register-card-image img,
+.artifact-packaging-image:focus-visible .register-card-image img,
+.artifact-portrait-image:hover .register-card-image img,
+.artifact-portrait-image:focus-visible .register-card-image img {
+  filter: drop-shadow(0 14px 28px rgba(34, 31, 27, 0.16));
+}
+
+.artifact-icon-image.register-board-card-dragging .register-card-image img,
+.artifact-icon-image.register-board-card-dragging:hover .register-card-image img,
+.artifact-icon-image.register-board-card-dragging:focus-visible .register-card-image img,
+.artifact-packaging-image.register-board-card-dragging .register-card-image img,
+.artifact-packaging-image.register-board-card-dragging:hover .register-card-image img,
+.artifact-packaging-image.register-board-card-dragging:focus-visible .register-card-image img,
+.artifact-portrait-image.register-board-card-dragging .register-card-image img,
+.artifact-portrait-image.register-board-card-dragging:hover .register-card-image img,
+.artifact-portrait-image.register-board-card-dragging:focus-visible .register-card-image img {
+  filter: none;
+  transition: none;
 }
 
 .artifact-icon-image .register-card-meta,
@@ -835,24 +948,27 @@ select {
 
 .register-card-image img {
   object-fit: contain;
-  padding: 32px 16px;
+  padding: 14px 16px;
 }
 
 .register-board-card:not(.register-board-artifact) .register-card-image img {
-  transform: none;
+  transform: scale(1.18);
+  transform-origin: center;
 }
 
 .register-card-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
   min-height: 66px;
   border-top: 0;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--liquid-glass-bg);
   padding: 16px 24px;
-  backdrop-filter: blur(19px) saturate(1.15);
-  -webkit-backdrop-filter: blur(19px) saturate(1.15);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .register-card-chip {
@@ -860,12 +976,12 @@ select {
   min-width: 0;
   align-items: center;
   min-height: 34px;
-  gap: 10px;
+  gap: 8px;
   border-radius: 999px;
   border: 0;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(19px) saturate(1.1);
-  -webkit-backdrop-filter: blur(19px) saturate(1.1);
+  background: var(--liquid-glass-bg);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
   color: #181816;
   font-size: 1rem;
   font-weight: 400;
@@ -885,9 +1001,11 @@ select {
   width: min(480px, 86%);
   margin: clamp(80px, 12vw, 160px) auto;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--liquid-glass-bg);
   padding: clamp(22px, 4vw, 40px);
-  box-shadow: 0 18px 48px rgba(34, 31, 27, 0.08);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .empty-register-card span {
@@ -1258,9 +1376,9 @@ select {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(20px) saturate(1.08);
-  -webkit-backdrop-filter: blur(20px) saturate(1.08);
+  background: var(--liquid-glass-bg);
+  backdrop-filter: blur(20px) saturate(1.16);
+  -webkit-backdrop-filter: blur(20px) saturate(1.16);
   content: "";
   pointer-events: none;
 }
@@ -1294,6 +1412,8 @@ select {
 }
 
 .recipe-view-card {
+  position: relative;
+  isolation: isolate;
   width: 100%;
   overflow: hidden;
   border-radius: 24px;
@@ -1302,13 +1422,17 @@ select {
 }
 
 .recipe-view-toolbar {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--liquid-glass-bg);
   padding: 16px 24px;
-  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .recipe-view-toolbar-group {
@@ -1324,21 +1448,34 @@ select {
   min-height: 38px;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   border: 0;
   border-radius: 100px;
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--liquid-glass-bg);
   color: #22201d;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.1;
   padding: 10px 16px;
-  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(19px) saturate(1.1);
-  -webkit-backdrop-filter: blur(19px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+}
+
+.recipe-view-chip svg,
+.recipe-view-close svg,
+.zoomable-image-controls button svg,
+.recipe-view-mode-switch button svg,
+.recipe-detail-facts > span svg,
+.servings-controls button svg,
+.artifact-view-chip svg,
+.artifact-view-close svg {
+  width: 18px;
+  height: 18px;
 }
 
 .recipe-view-close {
+  position: relative;
   display: grid;
   width: 38px;
   height: 38px;
@@ -1346,27 +1483,49 @@ select {
   place-items: center;
   border: 0;
   border-radius: 999px;
-  background: transparent;
-  color: #181816;
+  background: var(--liquid-glass-bg);
+  color: #22201d;
   cursor: pointer;
   padding: 0;
-  box-shadow: none;
-  transition:
-    background-color 140ms ease,
-    box-shadow 140ms ease;
+  overflow: hidden;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+}
+
+.recipe-view-close::before {
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  background: var(--liquid-glass-bg-active);
+  box-shadow: var(--liquid-glass-shadow);
+  content: "";
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.recipe-view-close svg {
+  position: relative;
+  z-index: 1;
 }
 
 .recipe-view-close:active,
+.recipe-view-close:hover,
 .recipe-view-close:focus-visible {
   outline: none;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.recipe-view-close:active::before,
+.recipe-view-close:hover::before,
+.recipe-view-close:focus-visible::before {
+  opacity: 1;
 }
 
 .recipe-view-graphic {
   position: relative;
+  z-index: 1;
   display: flex;
-  height: 585px;
+  height: 580px;
   align-items: center;
   justify-content: center;
   padding: 0;
@@ -1376,7 +1535,7 @@ select {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 0;
 }
 
@@ -1392,8 +1551,9 @@ select {
 .zoomable-image {
   position: absolute;
   inset: 0;
-  overflow: hidden;
+  overflow: visible;
   cursor: grab;
+  overscroll-behavior: contain;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -1409,24 +1569,26 @@ select {
   bottom: 12px;
   z-index: 2;
   display: inline-flex;
-  gap: 6px;
+  height: 38px;
+  align-items: center;
+  gap: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.62);
-  padding: 6px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background: var(--liquid-glass-bg);
+  padding: 4px;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .recipe-view-original .zoomable-image-controls {
-  right: calc(50% + 12px);
+  right: calc(50% - 15px);
   bottom: 32px;
 }
 
 .zoomable-image-controls button {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   place-items: center;
   border: 0;
   border-radius: 999px;
@@ -1441,17 +1603,19 @@ select {
 
 .recipe-view-mode-switch {
   position: absolute;
-  right: calc(50% - 93px);
+  right: calc(50% - 99px);
   bottom: 32px;
   z-index: 3;
   display: inline-flex;
-  gap: 4px;
+  height: 38px;
+  align-items: center;
+  gap: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--liquid-glass-bg);
   padding: 4px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .recipe-view-mode-switch button {
@@ -1467,22 +1631,24 @@ select {
 }
 
 .recipe-view-mode-switch .recipe-view-mode-active,
+.recipe-view-mode-switch button:hover,
 .recipe-view-mode-switch button:active,
 .recipe-view-mode-switch button:focus-visible {
   outline: none;
-  background: rgba(255, 255, 255, 0.68);
+  background: var(--liquid-glass-bg-active);
 }
 
+.zoomable-image-controls button:hover,
 .zoomable-image-controls button:active,
 .zoomable-image-controls button:focus-visible {
   outline: none;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  background: var(--liquid-glass-bg-active);
+  box-shadow: var(--liquid-glass-shadow);
 }
 
 .zoomable-image-media {
   pointer-events: none;
-  transition: transform 80ms linear;
+  transition: none;
   will-change: transform;
   -webkit-user-drag: none;
   user-select: none;
@@ -1490,6 +1656,8 @@ select {
 }
 
 .recipe-view-content {
+  position: relative;
+  z-index: 2;
   display: grid;
   gap: 16px;
   padding: 1px 24px 64px;
@@ -1498,12 +1666,14 @@ select {
 .recipe-view-intro {
   display: grid;
   min-height: 179px;
-  gap: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  gap: 8px;
+  border: 1px solid var(--liquid-glass-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.34);
+  background: var(--liquid-glass-bg);
   padding: 16px 24px;
-  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .recipe-detail-grid {
@@ -1519,7 +1689,9 @@ select {
   min-height: 360px;
   overflow: hidden;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--liquid-glass-bg);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
   box-shadow:
     0 18px 48px rgba(33, 30, 26, 0.13),
     0 0 0 1px rgba(24, 24, 22, 0.08);
@@ -1573,11 +1745,13 @@ select {
 }
 
 .recipe-content-panel {
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  border: 1px solid var(--liquid-glass-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.34);
+  background: var(--liquid-glass-bg);
   padding: 16px 24px;
-  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .recipe-author-box {
@@ -1605,7 +1779,7 @@ select {
 .recipe-detail-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 8px;
   border: 0;
   background: transparent;
   padding: 0;
@@ -1615,24 +1789,24 @@ select {
   display: inline-flex;
   height: 38px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--liquid-glass-bg);
   color: #181816;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1;
   padding: 0 16px;
-  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(19px) saturate(1.1);
-  -webkit-backdrop-filter: blur(19px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .recipe-difficulty-icons {
   display: inline-flex;
   align-items: center;
   min-height: 0;
-  gap: 6px;
+  gap: 8px;
   padding: 0;
   background: transparent;
   box-shadow: none;
@@ -1646,7 +1820,7 @@ select {
 }
 
 .recipe-difficulty-icon-muted {
-  color: rgba(24, 24, 22, 0.24);
+  color: #c9c7c2;
 }
 
 .recipe-difficulty-icon-active {
@@ -1663,14 +1837,14 @@ select {
   display: inline-flex;
   height: 38px;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   border: 0;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--liquid-glass-bg);
   padding: 4px;
-  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(19px) saturate(1.1);
-  -webkit-backdrop-filter: blur(19px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .servings-controls button {
@@ -1691,10 +1865,11 @@ select {
 }
 
 .servings-controls button:active,
+.servings-controls button:hover,
 .servings-controls button:focus-visible {
   outline: none;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  background: var(--liquid-glass-bg-active);
+  box-shadow: var(--liquid-glass-shadow);
 }
 
 .servings-controls span {
@@ -1737,7 +1912,7 @@ select {
 .recipe-ingredient-list li {
   display: grid;
   min-height: 24px;
-  grid-template-columns: 64px 1fr;
+  grid-template-columns: 84px 1fr;
   gap: 16px;
   border-bottom: 0;
   padding-bottom: 0;
@@ -1749,6 +1924,7 @@ select {
 .recipe-ingredient-list span {
   color: #181816;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .recipe-ingredient-text {
@@ -1804,7 +1980,7 @@ select {
 
 .recipe-tip-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .recipe-tip-list p {
@@ -1812,16 +1988,6 @@ select {
   font-size: 16px;
   font-weight: 400;
   line-height: 23px;
-}
-
-.recipe-collected-panel ul {
-  display: grid;
-  gap: 8px;
-}
-
-.recipe-collected-panel li {
-  color: #4c4740;
-  line-height: 1.42;
 }
 
 .artifact-detail {
@@ -1835,7 +2001,9 @@ select {
   min-height: min(70svh, 680px);
   overflow: hidden;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--liquid-glass-bg);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .artifact-lightbox {
@@ -1884,10 +2052,12 @@ select {
   justify-items: center;
   gap: 5px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.56);
+  background: var(--liquid-glass-bg);
   padding: 12px 16px;
   text-align: center;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .artifact-lightbox-caption span {
@@ -1919,22 +2089,31 @@ select {
 }
 
 .artifact-view-card {
+  display: flex;
+  flex-direction: column;
+  height: min(1371px, calc(100svh - 128px));
+  min-height: 620px;
   width: min(1000px, 100%);
   overflow: hidden;
   border-radius: 24px;
-  background: #232319;
+  background: #f5f4f0;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  isolation: isolate;
 }
 
 .artifact-view-toolbar {
+  position: relative;
+  z-index: 3;
   display: flex;
   min-height: 70px;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--liquid-glass-bg);
   padding: 16px 24px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .artifact-view-title-row {
@@ -1951,21 +2130,22 @@ select {
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   border: 0;
   border-radius: 100px;
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--liquid-glass-bg);
   color: #22201d;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.1;
   padding: 10px 16px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(19px) saturate(1.1);
-  -webkit-backdrop-filter: blur(19px) saturate(1.1);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
 }
 
 .artifact-view-close {
+  position: relative;
   display: grid;
   width: 38px;
   height: 38px;
@@ -1973,47 +2153,55 @@ select {
   place-items: center;
   border: 0;
   border-radius: 999px;
-  background: transparent;
-  color: #181816;
+  background: var(--liquid-glass-bg);
+  color: #22201d;
   cursor: pointer;
   padding: 0;
-  box-shadow: none;
-  transition:
-    background-color 140ms ease,
-    box-shadow 140ms ease;
+  overflow: hidden;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+}
+
+.artifact-view-close::before {
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  background: var(--liquid-glass-bg-active);
+  box-shadow: var(--liquid-glass-shadow);
+  content: "";
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.artifact-view-close svg {
+  position: relative;
+  z-index: 1;
 }
 
 .artifact-view-close:active,
+.artifact-view-close:hover,
 .artifact-view-close:focus-visible {
   outline: none;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.artifact-view-title-row p {
-  min-width: 0;
-  color: #fffffa;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.35;
-}
-
-.artifact-view-title-row a {
-  color: #fffffa;
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.artifact-view-close:active::before,
+.artifact-view-close:hover::before,
+.artifact-view-close:focus-visible::before {
+  opacity: 1;
 }
 
 .artifact-view-image-area {
   position: relative;
-  height: min(816px, calc(100svh - 220px));
-  min-height: 520px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
   padding: 32px;
 }
 
 .artifact-view-image-area .zoomable-image {
   inset: 32px;
+  overflow: visible;
 }
 
 .artifact-view-image-area .zoomable-image-media {
@@ -2027,6 +2215,36 @@ select {
   bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.artifact-view-caption {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: center;
+  background: var(--liquid-glass-bg);
+  padding: 24px;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+}
+
+.artifact-view-caption p {
+  margin: 0;
+  color: #1d1d1b;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.artifact-view-caption a {
+  color: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @keyframes unfold-detail {
@@ -2193,7 +2411,8 @@ select {
   }
 
   .register-board-card:not(.register-board-artifact) .register-card-image img {
-    padding: 24px 12px;
+    padding: 10px 12px;
+    transform: scale(1.16);
   }
 
   .register-card-meta {
@@ -2204,7 +2423,7 @@ select {
 
   .register-card-chip {
     min-height: 30px;
-    gap: 7px;
+    gap: 8px;
     font-size: 0.85rem;
     padding: 7px 10px;
   }
@@ -2265,10 +2484,6 @@ select {
     height: min(56svh, 520px);
   }
 
-  .artifact-view-image-area {
-    height: min(76svh, 760px);
-  }
-
   .artifact-lightbox-image {
     width: min(92vw, 820px);
     height: min(74svh, 760px);
@@ -2277,6 +2492,7 @@ select {
 
 @media (max-width: 700px) {
   .recipe-register-paper {
+    overflow-x: hidden;
     overflow-y: auto;
   }
 
@@ -2323,18 +2539,18 @@ select {
   }
 
   .register-card-image img {
-    padding: 20px 8px 18px;
+    padding: 8px;
   }
 
   .register-card-meta {
-    gap: 6px;
+    gap: 8px;
     min-height: 50px;
     padding: 8px 10px;
   }
 
   .register-card-chip {
     min-height: 30px;
-    gap: 5px;
+    gap: 8px;
     font-size: 0.72rem;
     padding: 6px 8px;
   }
@@ -2345,7 +2561,7 @@ select {
   }
 
   .register-board-card:not(.register-board-artifact) .register-card-image img {
-    transform: none;
+    transform: scale(1.12);
   }
 
   .empty-register-card {
@@ -2414,7 +2630,14 @@ select {
 
   .register-board-card:hover,
   .register-board-card:focus-visible {
-    transform: translateY(-3px);
+    transform: rotate(0deg) translateY(-3px) scale(1.01);
+    box-shadow: 0 12px 24px rgba(34, 31, 27, 0.12);
+  }
+
+  .register-board-artifact:hover,
+  .register-board-artifact:focus-visible {
+    box-shadow: none;
+    filter: drop-shadow(0 12px 24px rgba(34, 31, 27, 0.16));
   }
 
   .recipe-detail-backdrop {
@@ -2437,7 +2660,7 @@ select {
     position: sticky;
     top: 0;
     z-index: 3;
-    gap: 10px;
+    gap: 8px;
     padding: 12px 14px;
   }
 
@@ -2455,6 +2678,27 @@ select {
     padding: 0;
   }
 
+  .zoomable-image-controls button,
+  .recipe-view-mode-switch button,
+  .servings-controls button,
+  .artifact-view-close {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .recipe-view-chip svg,
+  .recipe-view-close svg,
+  .zoomable-image-controls button svg,
+  .recipe-view-mode-switch button svg,
+  .recipe-detail-facts > span svg,
+  .servings-controls button svg,
+  .artifact-view-chip svg,
+  .artifact-view-close svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .recipe-view-graphic {
     height: min(52svh, 430px);
     padding: 0;
@@ -2465,12 +2709,12 @@ select {
   }
 
   .recipe-view-original .zoomable-image-controls {
-    right: calc(50% + 12px);
+    right: calc(50% - 16px);
     bottom: 22px;
   }
 
   .recipe-view-mode-switch {
-    right: calc(50% - 93px);
+    right: calc(50% - 104px);
     bottom: 22px;
   }
 
@@ -2483,6 +2727,10 @@ select {
     padding: 18px;
   }
 
+  .recipe-detail-facts {
+    gap: 8px;
+  }
+
   .recipe-panel-header {
     align-items: center;
     flex-direction: row;
@@ -2491,18 +2739,19 @@ select {
   }
 
   .artifact-view-card {
+    height: 100svh;
     min-height: 100svh;
     border-radius: 0;
   }
 
   .artifact-view-toolbar {
-    align-items: flex-start;
+    align-items: center;
     padding: 12px 14px;
   }
 
   .artifact-view-title-row {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
   }
 
   .artifact-view-chip {
@@ -2518,18 +2767,22 @@ select {
     padding: 0;
   }
 
-  .artifact-view-title-row p {
-    font-size: 0.88rem;
-  }
-
   .artifact-view-image-area {
-    height: calc(100svh - 112px);
     min-height: 360px;
     padding: 18px;
   }
 
   .artifact-view-image-area .zoomable-image {
     inset: 18px;
+  }
+
+  .artifact-view-caption {
+    min-height: 64px;
+    padding: 18px 14px;
+  }
+
+  .artifact-view-caption p {
+    font-size: 0.88rem;
   }
 
   .artifact-lightbox {
@@ -2574,6 +2827,6 @@ select {
   }
 
   .recipe-ingredient-list li {
-    grid-template-columns: 56px 1fr;
+    grid-template-columns: 82px 1fr;
   }
 }

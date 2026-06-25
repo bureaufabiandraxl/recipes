@@ -15,8 +15,8 @@ import {
   ReceiptText,
   X,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent, WheelEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 import { collectedBookItems } from "@/data/recipes";
 import type { Recipe } from "@/types/recipe";
 
@@ -76,11 +76,20 @@ type RegisterEntry =
   | { id: string; label: string; type: "letter" }
   | { id: "info"; label: ""; type: "info" };
 
+interface RegisterRouteState {
+  activeLetter: string;
+  selectedItemId: string | null;
+}
+
 const cardColors = ["#fec8ff", "#deffc8", "#fff36e", "#e3fdff", "#ffb5e5", "#ff9e66"];
+const recipeColorOverrides: Record<string, string> = {
+  kirchtagskrapfen: "#fff36e",
+};
 const registerPageBaseHeight = 900;
 const registerPagePadding = 80;
 const registerLineHeight = 32;
 const registerContentHeight = registerPageBaseHeight - registerPagePadding * 2;
+const mobileMinimumVisibleRatio = 0.38;
 const defaultPositions: BoardPosition[] = [
   { x: 6.4, y: 32.4 },
   { x: 54.4, y: 69.2 },
@@ -123,6 +132,26 @@ const registerEntries: RegisterEntry[] = [
   ...designRegisterLetters.map((letter) => ({ id: letter, label: letter, type: "letter" }) as RegisterEntry),
   { id: "info", label: "", type: "info" },
 ];
+const liquidGlassRuntimeStyleId = "marianne-liquid-glass-backdrop-filter";
+const liquidGlassRuntimeSelectors = [
+  ".recipe-detail-backdrop::before",
+  ".recipe-view-toolbar",
+  ".recipe-view-chip",
+  ".recipe-view-close",
+  ".zoomable-image-controls",
+  ".recipe-view-mode-switch",
+  ".recipe-view-intro",
+  ".recipe-content-panel",
+  ".recipe-detail-facts > span",
+  ".servings-controls",
+  ".recipe-detail-original",
+  ".artifact-detail-image",
+  ".artifact-lightbox-caption",
+  ".artifact-view-toolbar",
+  ".artifact-view-chip",
+  ".artifact-view-close",
+  ".artifact-view-caption",
+].join(",\n");
 const imprintSections = [
   {
     title: "Medieninhaber und Kontakt",
@@ -276,6 +305,87 @@ function getLettersWithEntries(recipes: Recipe[]) {
   return letters;
 }
 
+function getRegisterHash(letter: string) {
+  if (letter === "intro") {
+    return "#/intro";
+  }
+
+  if (letter === "info") {
+    return "#/info";
+  }
+
+  return `#/register/${encodeURIComponent(letter)}`;
+}
+
+function getItemHash(item: BoardItem) {
+  const registerHash = getRegisterHash(item.registerLetter);
+
+  if (item.kind === "recipe") {
+    return `${registerHash}/recipe/${encodeURIComponent(item.recipe.slug)}`;
+  }
+
+  return `${registerHash}/artifact/${encodeURIComponent(item.id.replace(/^artifact-/, ""))}`;
+}
+
+function parseRegisterHash(hash: string): RegisterRouteState {
+  const fallbackRoute: RegisterRouteState = {
+    activeLetter: "intro",
+    selectedItemId: null,
+  };
+  const segments = hash
+    .replace(/^#\/?/, "")
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => decodeURIComponent(segment));
+
+  if (segments.length === 0) {
+    return fallbackRoute;
+  }
+
+  if (segments[0] === "intro") {
+    return { activeLetter: "intro", selectedItemId: null };
+  }
+
+  if (segments[0] === "info") {
+    return { activeLetter: "info", selectedItemId: null };
+  }
+
+  if (segments[0] !== "register" || !segments[1]) {
+    return fallbackRoute;
+  }
+
+  const activeLetter = segments[1];
+  const itemType = segments[2];
+  const itemSlug = segments[3];
+
+  if (itemType === "recipe" && itemSlug) {
+    return {
+      activeLetter,
+      selectedItemId: `recipe-${itemSlug}`,
+    };
+  }
+
+  if (itemType === "artifact" && itemSlug) {
+    return {
+      activeLetter,
+      selectedItemId: `artifact-${itemSlug}`,
+    };
+  }
+
+  return {
+    activeLetter,
+    selectedItemId: null,
+  };
+}
+
+function replaceRegisterHash(hash: string) {
+  window.history.replaceState(null, "", hash);
+}
+
+function pushRegisterHash(hash: string) {
+  window.history.pushState(null, "", hash);
+}
+
 function registerEntryHasContent(entry: RegisterEntry, lettersWithEntries: Set<string>) {
   if (entry.type !== "letter") {
     return true;
@@ -296,7 +406,38 @@ function registerEntryHasContent(entry: RegisterEntry, lettersWithEntries: Set<s
   return false;
 }
 
-function createBoardItems(recipes: Recipe[], activeLetter: string): BoardItem[] {
+function getSeededRandom(seed: string, key: string) {
+  let hash = 2166136261;
+  const source = `${seed}:${key}`;
+
+  for (let index = 0; index < source.length; index += 1) {
+    hash ^= source.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0) / 4294967295;
+}
+
+function getRandomizedBoardItem(item: BoardItem, seed: string, index: number): BoardItem {
+  if (!seed) {
+    return item;
+  }
+
+  const xOffset = (getSeededRandom(seed, `${item.id}:x`) - 0.5) * (item.kind === "recipe" ? 12 : 16);
+  const yOffset = (getSeededRandom(seed, `${item.id}:y`) - 0.5) * (item.kind === "recipe" ? 18 : 24);
+  const rotationOffset = (getSeededRandom(seed, `${item.id}:rotation`) - 0.5) * (item.kind === "recipe" ? 3 : 5);
+
+  return {
+    ...item,
+    rotation: item.rotation + rotationOffset,
+    position: {
+      x: clamp(item.position.x + xOffset, 3, item.kind === "recipe" ? 62 : 78),
+      y: clamp(item.position.y + yOffset + index * 0.6, 0, 160),
+    },
+  };
+}
+
+function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = ""): BoardItem[] {
   const recipesForLetter = recipes
     .filter((recipe) => recipe.registerLetter === activeLetter)
     .sort((recipeA, recipeB) => {
@@ -315,7 +456,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string): BoardItem[] 
       kind: "recipe",
       registerLetter: recipe.registerLetter,
       title: recipe.title,
-      color: cardColors[index % cardColors.length],
+      color: recipeColorOverrides[recipe.slug] ?? cardColors[index % cardColors.length],
       rotation: 0,
       image: recipe.originalCardImage,
       recipe,
@@ -383,7 +524,9 @@ function createBoardItems(recipes: Recipe[], activeLetter: string): BoardItem[] 
         ]
       : [];
 
-  return [...recipeItems, ...exampleArtifactItems, ...collectedArtifactItems];
+  return [...recipeItems, ...exampleArtifactItems, ...collectedArtifactItems].map((item, index) =>
+    getRandomizedBoardItem(item, layoutSeed, index),
+  );
 }
 
 function getEstimatedItemHeight(item: BoardItem) {
@@ -535,6 +678,7 @@ function ZoomableImage({
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
@@ -558,6 +702,7 @@ function ZoomableImage({
       return;
     }
 
+    event.preventDefault();
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     const points = Array.from(pointersRef.current.values());
 
@@ -616,27 +761,14 @@ function ZoomableImage({
     resetInteraction();
   }
 
-  function handleWheel(event: WheelEvent<HTMLDivElement>) {
-    event.preventDefault();
-    const zoomDirection = event.deltaY > 0 ? -1 : 1;
-    const zoomFactor = zoomDirection > 0 ? 1.12 : 0.9;
-
-    setTransform((current) => ({
-      ...current,
-      scale: clamp(current.scale * zoomFactor, 1, 5),
-    }));
-  }
-
   return (
     <div
       aria-label={`${alt} vergrößern und verschieben`}
       className={["zoomable-image", className].filter(Boolean).join(" ")}
-      onDoubleClick={resetZoom}
       onPointerCancel={handlePointerUp}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onWheel={handleWheel}
       role="group"
     >
       <Image
@@ -652,7 +784,12 @@ function ZoomableImage({
         }}
       />
 
-      <div className="zoomable-image-controls" onPointerDown={(event) => event.stopPropagation()}>
+      <div
+        className="zoomable-image-controls"
+        onClick={(event) => event.stopPropagation()}
+        onDoubleClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
         <button aria-label="Verkleinern" onClick={() => changeZoom(0.82)} type="button">
           <Minus aria-hidden="true" size={17} strokeWidth={2.2} />
         </button>
@@ -671,16 +808,95 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
   const lettersWithEntries = useMemo(() => getLettersWithEntries(recipes), [recipes]);
   const firstLetter = "intro";
   const [activeLetter, setActiveLetter] = useState<string>(firstLetter);
+  const [layoutSeed, setLayoutSeed] = useState("");
   const [positions, setPositions] = useState<Record<string, BoardPosition>>({});
+  const [zIndexes, setZIndexes] = useState<Record<string, number>>({});
   const [selectedItem, setSelectedItem] = useState<BoardItem | null>(null);
+  const [selectedItemIdFromRoute, setSelectedItemIdFromRoute] = useState<string | null>(null);
+  const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
+  const zIndexCounterRef = useRef(1);
   const lastInteractionMovedRef = useRef(false);
 
+  useEffect(() => {
+    setLayoutSeed(`${Date.now()}-${Math.random()}`);
+  }, []);
+
+  useEffect(() => {
+    if (document.getElementById(liquidGlassRuntimeStyleId)) {
+      return;
+    }
+
+    const style = document.createElement("style");
+    style.id = liquidGlassRuntimeStyleId;
+    style.textContent = `
+${liquidGlassRuntimeSelectors} {
+  backdrop-filter: var(--liquid-glass-filter) !important;
+  -webkit-backdrop-filter: var(--liquid-glass-filter) !important;
+}
+
+.recipe-detail-backdrop::before {
+  backdrop-filter: blur(20px) saturate(1.16) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.16) !important;
+}
+`;
+    document.head.appendChild(style);
+  }, []);
+
+  useEffect(() => {
+    function applyRouteFromHash() {
+      const route = parseRegisterHash(window.location.hash);
+      const nextEntry = registerEntries.find((entry) => entry.id === route.activeLetter);
+
+      if (!nextEntry || !registerEntryHasContent(nextEntry, lettersWithEntries)) {
+        replaceRegisterHash(getRegisterHash(firstLetter));
+        setActiveLetter(firstLetter);
+        setSelectedItem(null);
+        setSelectedItemIdFromRoute(null);
+        return;
+      }
+
+      setActiveLetter(route.activeLetter);
+      setSelectedItemIdFromRoute(route.selectedItemId);
+
+      if (!route.selectedItemId) {
+        setSelectedItem(null);
+      }
+    }
+
+    if (!window.location.hash) {
+      replaceRegisterHash(getRegisterHash(firstLetter));
+    }
+
+    applyRouteFromHash();
+    window.addEventListener("hashchange", applyRouteFromHash);
+    window.addEventListener("popstate", applyRouteFromHash);
+
+    return () => {
+      window.removeEventListener("hashchange", applyRouteFromHash);
+      window.removeEventListener("popstate", applyRouteFromHash);
+    };
+  }, [firstLetter, lettersWithEntries]);
+
   const boardItems = useMemo(
-    () => createBoardItems(recipes, activeLetter),
-    [activeLetter, recipes],
+    () => createBoardItems(recipes, activeLetter, layoutSeed),
+    [activeLetter, layoutSeed, recipes],
   );
+
+  useEffect(() => {
+    if (!selectedItemIdFromRoute) {
+      return;
+    }
+
+    const routedItem = boardItems.find((item) => item.id === selectedItemIdFromRoute);
+
+    if (routedItem) {
+      setSelectedItem(routedItem);
+    } else {
+      setSelectedItem(null);
+    }
+  }, [boardItems, selectedItemIdFromRoute]);
   const activeRegisterEntry = registerEntries.find((entry) => entry.id === activeLetter);
   const isSpecialRegisterPage = activeRegisterEntry?.type === "intro" || activeRegisterEntry?.type === "info";
   const canvasMinHeight = useMemo(() => {
@@ -706,6 +922,14 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
     return positions[item.id] ?? item.position;
   }
 
+  function bringItemToFront(itemId: string) {
+    zIndexCounterRef.current += 1;
+    setZIndexes((current) => ({
+      ...current,
+      [itemId]: zIndexCounterRef.current,
+    }));
+  }
+
   function handleLetterChange(letter: string) {
     const nextEntry = registerEntries.find((entry) => entry.id === letter);
 
@@ -713,8 +937,10 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
       return;
     }
 
+    pushRegisterHash(getRegisterHash(letter));
     setActiveLetter(letter);
     setSelectedItem(null);
+    setSelectedItemIdFromRoute(null);
   }
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>, item: BoardItem) {
@@ -724,6 +950,8 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
 
     const itemRect = event.currentTarget.getBoundingClientRect();
 
+    bringItemToFront(item.id);
+    setDraggingItemId(item.id);
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = {
       id: item.id,
@@ -747,10 +975,10 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
     const boardRect = board.getBoundingClientRect();
     const isMobileLayout = window.matchMedia("(max-width: 700px)").matches;
     const lineInset = 16;
-    const mobileHorizontalBleed = Math.min(56, drag.itemWidth * 0.22);
-    const minLeftPx = isMobileLayout ? -mobileHorizontalBleed : lineInset;
+    const mobileHiddenWidth = drag.itemWidth * (1 - mobileMinimumVisibleRatio);
+    const minLeftPx = isMobileLayout ? -mobileHiddenWidth : lineInset;
     const maxLeftPx = isMobileLayout
-      ? boardRect.width - drag.itemWidth + mobileHorizontalBleed
+      ? boardRect.width - drag.itemWidth * mobileMinimumVisibleRatio
       : boardRect.width - lineInset - drag.itemWidth;
     const canvasHeight = board.scrollHeight || boardRect.height;
     const minTopPx = registerPagePadding;
@@ -782,18 +1010,30 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
     }
 
     dragRef.current = null;
+    setDraggingItemId(null);
 
     if (!moved) {
+      pushRegisterHash(getItemHash(item));
       setSelectedItem(item);
+      setSelectedItemIdFromRoute(item.id);
+      lastInteractionMovedRef.current = true;
     }
   }
 
   function handleCardClick(item: BoardItem) {
     if (!lastInteractionMovedRef.current) {
+      pushRegisterHash(getItemHash(item));
       setSelectedItem(item);
+      setSelectedItemIdFromRoute(item.id);
     }
 
     lastInteractionMovedRef.current = false;
+  }
+
+  function closeSelectedItem() {
+    pushRegisterHash(getRegisterHash(activeLetter));
+    setSelectedItem(null);
+    setSelectedItemIdFromRoute(null);
   }
 
   return (
@@ -900,6 +1140,7 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
                         "register-board-card",
                         item.kind === "artifact" ? "register-board-artifact" : "",
                         item.kind === "artifact" && item.artifactClass ? item.artifactClass : "",
+                        draggingItemId === item.id ? "register-board-card-dragging" : "",
                       ].join(" ")}
                       key={item.id}
                       onClick={() => handleCardClick(item)}
@@ -911,6 +1152,7 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
                         "--card-rotation": `${item.rotation}deg`,
                         left: `${position.x}%`,
                         top: `${getItemTopPx(position)}px`,
+                        zIndex: zIndexes[item.id] ?? 1,
                       } as CSSProperties}
                       type="button"
                     >
@@ -1015,7 +1257,7 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
       {selectedItem ? (
         <div
           className="recipe-detail-backdrop"
-          onClick={() => setSelectedItem(null)}
+          onClick={closeSelectedItem}
           role="presentation"
         >
           <article
@@ -1025,11 +1267,11 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
             {selectedItem.kind === "recipe" ? (
               <RecipeDetail
                 color={selectedItem.color}
-                onClose={() => setSelectedItem(null)}
+                onClose={closeSelectedItem}
                 recipe={selectedItem.recipe}
               />
             ) : (
-              <ArtifactDetail item={selectedItem} onClose={() => setSelectedItem(null)} />
+              <ArtifactDetail item={selectedItem} onClose={closeSelectedItem} />
             )}
           </article>
         </div>
@@ -1110,10 +1352,6 @@ function RecipeDetail({
 
           <div className="recipe-detail-facts">
             <span>
-              <Clock3 aria-hidden="true" size={18} strokeWidth={1.9} />
-              {getCardTimeLabel(recipe)}
-            </span>
-            <span>
               {getDifficultyLabel(recipe)}
               <span className="recipe-difficulty-icons" aria-hidden="true">
                 {[1, 2, 3].map((level) => (
@@ -1170,8 +1408,8 @@ function RecipeDetail({
                     {formatAmount(ingredient.amount, servingsMultiplier)} {ingredient.unit}
                   </span>
                   <div className="recipe-ingredient-text">
-                    <strong>{ingredient.name}{ingredient.note ? "," : ""}</strong>
-                    {ingredient.note ? <small> {ingredient.note}</small> : null}
+                    <strong>{ingredient.name}</strong>
+                    {ingredient.note ? <small>, {ingredient.note}</small> : null}
                   </div>
                 </li>
               ))}
@@ -1198,17 +1436,6 @@ function RecipeDetail({
               ))}
             </div>
           </section>
-
-          {recipe.collectedItems.length > 0 ? (
-            <section className="recipe-content-panel recipe-collected-panel">
-              <h2>Mitgesammelt</h2>
-              <ul>
-                {recipe.collectedItems.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
         </div>
       </div>
     </div>
@@ -1230,17 +1457,6 @@ function ArtifactDetail({
             <ImageIcon aria-hidden="true" size={18} strokeWidth={1.9} />
             {item.title}
           </span>
-          <p>
-            {item.description}
-            {item.captionLink ? (
-              <>
-                {" "}
-                <a href={item.captionLink} rel="noreferrer" target="_blank">
-                  Quelle
-                </a>
-              </>
-            ) : null}
-          </p>
         </div>
 
         <button
@@ -1256,6 +1472,20 @@ function ArtifactDetail({
       <div className="artifact-view-image-area">
         <ZoomableImage alt={item.caption ?? item.title} priority sizes="92vw" src={item.image} />
       </div>
+
+      <footer className="artifact-view-caption">
+        <p>
+          {item.description}
+          {item.captionLink ? (
+            <>
+              {" "}
+              <a href={item.captionLink} rel="noreferrer" target="_blank">
+                Quelle
+              </a>
+            </>
+          ) : null}
+        </p>
+      </footer>
     </div>
   );
 }

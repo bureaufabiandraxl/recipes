@@ -3,7 +3,13 @@ import localFont from "next/font/local";
 import "./globals.css";
 
 const anitaSans = localFont({
-  src: "./fonts/AnitaSans-VariableVF.ttf",
+  src: [
+    {
+      path: "./fonts/AnitaSans-VariableVF.ttf",
+      style: "normal",
+      weight: "100 900",
+    },
+  ],
   variable: "--font-anita-sans",
   display: "swap",
 });
