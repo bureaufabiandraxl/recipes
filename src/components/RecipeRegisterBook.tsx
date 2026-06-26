@@ -159,6 +159,7 @@ const liquidGlassRuntimeSelectors = [
   ".recipe-view-intro",
   ".recipe-content-panel",
   ".recipe-detail-facts > span",
+  ".recipe-detail-facts .servings-controls",
   ".servings-controls",
   ".recipe-detail-original",
   ".artifact-detail-image",
@@ -1407,6 +1408,23 @@ function RecipeDetail({
           <p className="recipe-detail-story">{recipe.story}</p>
 
           <div className="recipe-detail-facts">
+            <div className="servings-controls" aria-label="Portionen anpassen">
+              <button
+                aria-label="Eine Portion weniger"
+                onClick={() => changeServings(servings - 1)}
+                type="button"
+              >
+                <Minus aria-hidden="true" size={18} strokeWidth={2.2} />
+              </button>
+              <span>{servings} {servingsUnit}</span>
+              <button
+                aria-label="Eine Portion mehr"
+                onClick={() => changeServings(servings + 1)}
+                type="button"
+              >
+                <Plus aria-hidden="true" size={18} strokeWidth={2.2} />
+              </button>
+            </div>
             <span>
               {getDifficultyLabel(recipe)}
               <span className="recipe-difficulty-icons" aria-hidden="true">
@@ -1438,24 +1456,7 @@ function RecipeDetail({
         <div className="recipe-detail-sections">
           <section className="recipe-content-panel recipe-ingredients-panel">
             <div className="recipe-panel-header">
-              <h2>Zutaten für:</h2>
-              <div className="servings-controls" aria-label="Portionen anpassen">
-                <button
-                  aria-label="Eine Portion weniger"
-                  onClick={() => changeServings(servings - 1)}
-                  type="button"
-                >
-                  <Minus aria-hidden="true" size={18} strokeWidth={2.2} />
-                </button>
-                <span>{servings} {servingsUnit}</span>
-                <button
-                  aria-label="Eine Portion mehr"
-                  onClick={() => changeServings(servings + 1)}
-                  type="button"
-                >
-                  <Plus aria-hidden="true" size={18} strokeWidth={2.2} />
-                </button>
-              </div>
+              <h2>Zutaten:</h2>
             </div>
             <ul className="recipe-ingredient-list">
               {recipe.ingredients.map((ingredient) => (
