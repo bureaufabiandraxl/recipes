@@ -1321,6 +1321,10 @@ function RecipeDetail({
   const servingsUnit = getServingsUnit(recipe);
   const authorLabel = getRecipeAuthorLabel(recipe);
   const hasPhoto = Boolean(recipe.photoImage);
+  const hasIngredients = recipe.ingredients.length > 0;
+  const hasSteps = recipe.steps.length > 0;
+  const hasTips = recipe.tips.length > 0;
+  const hasContentSections = hasIngredients || hasSteps || hasTips;
   const visualImage =
     visualMode === "photo" && recipe.photoImage ? recipe.photoImage : recipe.originalCardImage;
   const visualAlt =
@@ -1408,23 +1412,25 @@ function RecipeDetail({
           <p className="recipe-detail-story">{recipe.story}</p>
 
           <div className="recipe-detail-facts">
-            <div className="servings-controls" aria-label="Portionen anpassen">
-              <button
-                aria-label="Eine Portion weniger"
-                onClick={() => changeServings(servings - 1)}
-                type="button"
-              >
-                <Minus aria-hidden="true" size={18} strokeWidth={2.2} />
-              </button>
-              <span>{servings} {servingsUnit}</span>
-              <button
-                aria-label="Eine Portion mehr"
-                onClick={() => changeServings(servings + 1)}
-                type="button"
-              >
-                <Plus aria-hidden="true" size={18} strokeWidth={2.2} />
-              </button>
-            </div>
+            {hasIngredients ? (
+              <div className="servings-controls" aria-label="Portionen anpassen">
+                <button
+                  aria-label="Eine Portion weniger"
+                  onClick={() => changeServings(servings - 1)}
+                  type="button"
+                >
+                  <Minus aria-hidden="true" size={18} strokeWidth={2.2} />
+                </button>
+                <span>{servings} {servingsUnit}</span>
+                <button
+                  aria-label="Eine Portion mehr"
+                  onClick={() => changeServings(servings + 1)}
+                  type="button"
+                >
+                  <Plus aria-hidden="true" size={18} strokeWidth={2.2} />
+                </button>
+              </div>
+            ) : null}
             <span>
               {getDifficultyLabel(recipe)}
               <span className="recipe-difficulty-icons" aria-hidden="true">
@@ -1453,47 +1459,55 @@ function RecipeDetail({
           </div>
         </section>
 
-        <div className="recipe-detail-sections">
-          <section className="recipe-content-panel recipe-ingredients-panel">
-            <div className="recipe-panel-header">
-              <h2>Zutaten:</h2>
-            </div>
-            <ul className="recipe-ingredient-list">
-              {recipe.ingredients.map((ingredient) => (
-                <li key={`${recipe.slug}-${ingredient.name}`}>
-                  <span>
-                    {formatAmount(ingredient.amount, servingsMultiplier)} {ingredient.unit}
-                  </span>
-                  <div className="recipe-ingredient-text">
-                    <strong>{ingredient.name}</strong>
-                    {ingredient.note ? <small>, {ingredient.note}</small> : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
+        {hasContentSections ? (
+          <div className="recipe-detail-sections">
+            {hasIngredients ? (
+              <section className="recipe-content-panel recipe-ingredients-panel">
+                <div className="recipe-panel-header">
+                  <h2>Zutaten:</h2>
+                </div>
+                <ul className="recipe-ingredient-list">
+                  {recipe.ingredients.map((ingredient) => (
+                    <li key={`${recipe.slug}-${ingredient.name}`}>
+                      <span>
+                        {formatAmount(ingredient.amount, servingsMultiplier)} {ingredient.unit}
+                      </span>
+                      <div className="recipe-ingredient-text">
+                        <strong>{ingredient.name}</strong>
+                        {ingredient.note ? <small>, {ingredient.note}</small> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
-          <section className="recipe-content-panel">
-            <h2>Zubereitung:</h2>
-            <ol className="recipe-step-list">
-              {recipe.steps.map((step) => (
-                <li key={step.number}>
-                  <span>{step.number}.</span>
-                  <p>{step.instruction}</p>
-                </li>
-              ))}
-            </ol>
-          </section>
+            {hasSteps ? (
+              <section className="recipe-content-panel">
+                <h2>Zubereitung:</h2>
+                <ol className="recipe-step-list">
+                  {recipe.steps.map((step) => (
+                    <li key={step.number}>
+                      <span>{step.number}.</span>
+                      <p>{step.instruction}</p>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
 
-          <section className="recipe-content-panel recipe-tips-panel">
-            <h2>Tipps:</h2>
-            <div className="recipe-tip-list">
-              {recipe.tips.map((tip) => (
-                <p key={tip}>{tip}</p>
-              ))}
-            </div>
-          </section>
-        </div>
+            {hasTips ? (
+              <section className="recipe-content-panel recipe-tips-panel">
+                <h2>Tipps:</h2>
+                <div className="recipe-tip-list">
+                  {recipe.tips.map((tip) => (
+                    <p key={tip}>{tip}</p>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );
