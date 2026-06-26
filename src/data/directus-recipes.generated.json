@@ -488,5 +488,48 @@
     ],
     "notesFromOriginal": [],
     "featured": false
+  },
+  {
+    "id": "dc9dfe41-801b-480a-975b-e53e87a9168a",
+    "slug": "testrezept",
+    "registerLetter": "T",
+    "author": "Tante Nanni",
+    "authorNote": "",
+    "entryType": "rezept",
+    "title": "Testrezept",
+    "shortDescription": "",
+    "story": "Hallo 123",
+    "originalCardImage": "",
+    "coverImage": "",
+    "galleryImages": [],
+    "servingsDefault": 4,
+    "servingsUnit": "Portionen",
+    "preparationTime": 40,
+    "prepTime": 40,
+    "cookTime": 0,
+    "totalTime": 40,
+    "difficulty": "einfach",
+    "category": "Kekse",
+    "categories": [
+      "Kekse"
+    ],
+    "tags": [],
+    "collectedItems": [],
+    "ingredients": [
+      {
+        "name": "Zitrone",
+        "amount": 5,
+        "unit": "Stk"
+      }
+    ],
+    "steps": [
+      {
+        "number": 1,
+        "instruction": "Hallo 233"
+      }
+    ],
+    "tips": [],
+    "notesFromOriginal": [],
+    "featured": false
   }
 ]

@@ -70,12 +70,14 @@ async function directusFetch(pathname, options = {}) {
 }
 
 async function downloadAsset(fileId) {
-  if (!fileId) return undefined;
+  const resolvedFileId = fileId && typeof fileId === "object" ? fileId.id : fileId;
 
-  const response = await directusFetch(`/assets/${fileId}`);
+  if (!resolvedFileId) return undefined;
+
+  const response = await directusFetch(`/assets/${resolvedFileId}`);
   const contentType = response.headers.get("content-type") ?? "";
-  const extension = extensionFromContentType(contentType, extname(fileId));
-  const fileName = `${fileId}${extension}`;
+  const extension = extensionFromContentType(contentType, extname(resolvedFileId));
+  const fileName = `${resolvedFileId}${extension}`;
   const publicPath = `/images/directus/${fileName}`;
   const targetPath = join(generatedImagesDir, fileName);
   const buffer = Buffer.from(await response.arrayBuffer());
@@ -91,6 +93,34 @@ function normalizeTips(tips) {
   return tips
     .map((tip) => (typeof tip === "string" ? tip : tip?.text))
     .filter(Boolean);
+}
+
+function slugify(value, fallback) {
+  const slug = String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || fallback;
+}
+
+function normalizeIngredients(ingredients) {
+  if (!Array.isArray(ingredients)) return [];
+
+  return ingredients.map((ingredient) => ({
+    ...ingredient,
+    amount:
+      ingredient?.amount === "" || ingredient?.amount === null || ingredient?.amount === undefined
+        ? 0
+        : Number(ingredient.amount),
+  }));
 }
 
 async function main() {
@@ -115,10 +145,11 @@ async function main() {
       const photoImage = await downloadAsset(recipe.photo_image);
       const preparationTime = recipe.preparation_time ?? 0;
       const category = recipe.category ?? undefined;
+      const slug = slugify(recipe.slug ?? recipe.title, recipe.id);
 
       return {
         id: recipe.id,
-        slug: recipe.slug,
+        slug,
         registerLetter: recipe.register_letter ?? recipe.title?.charAt(0).toUpperCase() ?? "A",
         author: recipe.author ?? "Marianne",
         authorNote: "",
@@ -142,7 +173,7 @@ async function main() {
         categories: category ? [category] : [],
         tags: [],
         collectedItems: [],
-        ingredients: recipe.ingredients ?? [],
+        ingredients: normalizeIngredients(recipe.ingredients),
         steps: recipe.steps ?? [],
         tips: normalizeTips(recipe.tips),
         notesFromOriginal: [],
