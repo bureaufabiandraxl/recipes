@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "cms:sync": "node scripts/sync-directus.mjs",
+    "build": "npm run cms:sync && next build",
     "start": "next start",
     "lint": "eslint"
   },

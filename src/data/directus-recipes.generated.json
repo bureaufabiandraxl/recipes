@@ -1,0 +1,491 @@
+[
+  {
+    "id": "b86ea074-71a0-404d-94c3-f21ee9c14527",
+    "slug": "eierlikoer",
+    "registerLetter": "E",
+    "author": "Marianne",
+    "authorNote": "",
+    "entryType": "rezept",
+    "title": "Eierlikör",
+    "shortDescription": "",
+    "story": "Diese Karte gehört in den vorderen E-Teil des Registerbuchs: ein Rezept, das zu Feiertagen aus dem Kasten geholt wurde. Die moderne Fassung bleibt samtig und klassisch, wird aber mit sauberer Temperaturführung zubereitet.",
+    "originalCardImage": "/images/directus/a49c51ed-5d6e-4b31-9e58-c65a0e660fd3.svg",
+    "coverImage": "/images/directus/a49c51ed-5d6e-4b31-9e58-c65a0e660fd3.svg",
+    "galleryImages": [],
+    "servingsDefault": 750,
+    "servingsUnit": "Mililiter",
+    "preparationTime": 30,
+    "prepTime": 30,
+    "cookTime": 0,
+    "totalTime": 30,
+    "difficulty": "einfach",
+    "category": "",
+    "categoryIcon": "Martini",
+    "categories": [],
+    "tags": [],
+    "collectedItems": [],
+    "ingredients": [
+      {
+        "name": "Eigelb",
+        "amount": 8,
+        "unit": "Stk"
+      },
+      {
+        "name": "Staubzucker",
+        "amount": 180,
+        "unit": "g"
+      },
+      {
+        "name": "Vanillezucker",
+        "amount": 1,
+        "unit": "Pkg"
+      },
+      {
+        "name": "Kondensmilch oder Schlagobers",
+        "amount": 250,
+        "unit": "ml"
+      },
+      {
+        "name": "Milch",
+        "amount": 150,
+        "unit": "ml"
+      },
+      {
+        "name": "Rum, mild",
+        "amount": 250,
+        "unit": "ml"
+      },
+      {
+        "name": "Vanille",
+        "amount": 1,
+        "unit": "Prise",
+        "note": "oder Mark einer halben Schote"
+      }
+    ],
+    "steps": [
+      {
+        "number": 1,
+        "instruction": "Eigelb, Staubzucker, Vanillezucker und Vanille über Wasserdampf hell und cremig aufschlagen."
+      },
+      {
+        "number": 2,
+        "instruction": "Kondensmilch und Milch langsam einrühren und die Masse warm, aber nicht kochend, einige Minuten cremig ziehen lassen."
+      },
+      {
+        "number": 3,
+        "instruction": "Vom Herd nehmen, kurz abkühlen lassen und den Rum langsam einrühren."
+      },
+      {
+        "number": 4,
+        "instruction": "Durch ein feines Sieb in saubere Flaschen füllen. Gekühlt lagern und vor dem Einschenken schütteln."
+      }
+    ],
+    "tips": [],
+    "notesFromOriginal": [],
+    "featured": false
+  },
+  {
+    "id": "8c01b82b-baa2-4154-b2ce-af471e60c9ee",
+    "slug": "eiskonfekt",
+    "registerLetter": "E",
+    "author": "Gastautorin Tante Nanni",
+    "authorNote": "",
+    "entryType": "rezept",
+    "title": "Eiskonfekt",
+    "shortDescription": "",
+    "story": "Dieses Eiskonfekt hat Oma immer wieder zu Weihnachten für uns gezaubert.",
+    "originalCardImage": "/images/directus/a5dfc616-558c-45af-bf71-8c88961a6a13.svg",
+    "coverImage": "/images/directus/a5dfc616-558c-45af-bf71-8c88961a6a13.svg",
+    "galleryImages": [],
+    "servingsDefault": 24,
+    "servingsUnit": "Förmchen",
+    "preparationTime": 80,
+    "prepTime": 80,
+    "cookTime": 0,
+    "totalTime": 80,
+    "difficulty": "einfach",
+    "category": "Kekse",
+    "categoryIcon": "Cookie",
+    "categories": [
+      "Kekse"
+    ],
+    "tags": [],
+    "collectedItems": [],
+    "ingredients": [
+      {
+        "name": "Kokosfett",
+        "amount": 120,
+        "unit": "g",
+        "note": "Raumtemperatur, ca. 22 °C"
+      },
+      {
+        "name": "Zartbitterschokolade",
+        "amount": 160,
+        "unit": "g"
+      },
+      {
+        "name": "Vollmilchschokolade",
+        "amount": 80,
+        "unit": "g"
+      },
+      {
+        "name": "Staubzucker",
+        "amount": 70,
+        "unit": "g"
+      },
+      {
+        "name": "Kakao",
+        "amount": 2,
+        "unit": "EL"
+      },
+      {
+        "name": "Vanillezucker",
+        "amount": 1,
+        "unit": "Pkg"
+      },
+      {
+        "name": "Kokosflocken",
+        "amount": 40,
+        "unit": "g",
+        "note": "optional zum Bestreuen"
+      },
+      {
+        "name": "Papierförmchen",
+        "amount": 24,
+        "unit": "Stk",
+        "note": "ca. 20 mm Durchmesser"
+      }
+    ],
+    "steps": [
+      {
+        "number": 1,
+        "instruction": "120 g Kokosfett bei niedriger Hitze schmelzen und im Anschluss beide Schokoladen darin langsam auflösen."
+      },
+      {
+        "number": 2,
+        "instruction": "70 g Staubzucker, 2 EL Kakao und 1 Pkg Vanillezucker glatt einrühren."
+      },
+      {
+        "number": 3,
+        "instruction": "Masse in kleine Papierförmchen oder eine mit Backpapier ausgelegte Form gießen."
+      },
+      {
+        "number": 4,
+        "instruction": "Mit Kokosflocken bestreuen und mindestens 1 Stunde kalt stellen."
+      }
+    ],
+    "tips": [
+      "Direkt aus dem Kühlschrank servieren.",
+      "Für Erwachsene passt ein kleiner Löffel Rum in die Masse."
+    ],
+    "notesFromOriginal": [],
+    "featured": false
+  },
+  {
+    "id": "395f1551-a30d-4e58-b17c-4841dd1de524",
+    "slug": "kirchtagskrapfen",
+    "registerLetter": "K",
+    "author": "Marianne nach Rezept von Resi",
+    "authorNote": "",
+    "entryType": "rezept",
+    "title": "Kirchtagskrapfen",
+    "shortDescription": "",
+    "story": "Im K-Register sitzt der große Festtagsklassiker. Der Gastautorinnen-Hinweis gehört hier bewusst dazu: Solche Rezepte wanderten von Küche zu Küche, bis sie irgendwann ganz selbstverständlich in Omas Buch zuhause waren.",
+    "originalCardImage": "/images/directus/6e635619-796a-4284-adfc-16da7ee4fee0.svg",
+    "coverImage": "/images/directus/6e635619-796a-4284-adfc-16da7ee4fee0.svg",
+    "galleryImages": [],
+    "servingsDefault": 12,
+    "servingsUnit": "Portionen",
+    "preparationTime": 115,
+    "prepTime": 115,
+    "cookTime": 0,
+    "totalTime": 115,
+    "difficulty": "anspruchsvoll",
+    "category": "Gebäck",
+    "categoryIcon": "Cookie",
+    "categories": [
+      "Gebäck"
+    ],
+    "tags": [],
+    "collectedItems": [],
+    "ingredients": [
+      {
+        "name": "Mehl glatt",
+        "amount": 500,
+        "unit": "g"
+      },
+      {
+        "name": "Milch, lauwarm",
+        "amount": 250,
+        "unit": "ml"
+      },
+      {
+        "name": "Germ frisch",
+        "amount": 25,
+        "unit": "g"
+      },
+      {
+        "name": "Zucker",
+        "amount": 50,
+        "unit": "g"
+      },
+      {
+        "name": "Eigelb",
+        "amount": 3,
+        "unit": "Stk"
+      },
+      {
+        "name": "Butter, weich",
+        "amount": 60,
+        "unit": "g"
+      },
+      {
+        "name": "Rum",
+        "amount": 1,
+        "unit": "EL"
+      },
+      {
+        "name": "Salz",
+        "amount": 1,
+        "unit": "Prise"
+      },
+      {
+        "name": "Butterschmalz oder Öl",
+        "amount": 1000,
+        "unit": "ml",
+        "note": "zum Ausbacken"
+      }
+    ],
+    "steps": [
+      {
+        "number": 1,
+        "instruction": "Germ mit etwas Milch, Zucker und Mehl verrühren und 10 Minuten anspringen lassen."
+      },
+      {
+        "number": 2,
+        "instruction": "Mit restlicher Milch, Eigelb, Butter, Rum und Salz zu einem glatten Teig kneten. Zugedeckt ca. 45 Minuten gehen lassen."
+      },
+      {
+        "number": 3,
+        "instruction": "Teig in Stücke teilen, rund schleifen und nochmals 20 Minuten rasten lassen."
+      },
+      {
+        "number": 4,
+        "instruction": "Krapfen von der Mitte her dünn ausziehen, den Rand dicker lassen und in heißem Fett goldbraun backen."
+      },
+      {
+        "number": 5,
+        "instruction": "Auf Küchenpapier abtropfen lassen und mit Staubzucker servieren."
+      }
+    ],
+    "tips": [
+      "Das Fett ist richtig heiß, wenn an einem Holzstiel kleine Bläschen aufsteigen.",
+      "Die Mitte dünn ziehen, aber nicht reißen lassen."
+    ],
+    "notesFromOriginal": [],
+    "featured": false
+  },
+  {
+    "id": "953edcb1-b0c2-4b4a-90e7-54140ea8d089",
+    "slug": "lebkuchen",
+    "registerLetter": "L",
+    "author": "Marianne",
+    "authorNote": "",
+    "entryType": "rezept",
+    "title": "Lebkuchen",
+    "shortDescription": "",
+    "story": "Unter L steckt Weihnachten. Die Karte wirkt wie ein Arbeitsblatt: nicht perfekt sauber, sondern benutzt, verbessert und wieder hervorgeholt, sobald der erste Advent näher kam.",
+    "originalCardImage": "/images/directus/dd1115f3-3966-4931-ade8-3a4e1ca77303.svg",
+    "coverImage": "/images/directus/dd1115f3-3966-4931-ade8-3a4e1ca77303.svg",
+    "galleryImages": [],
+    "servingsDefault": 35,
+    "servingsUnit": "Portionen",
+    "preparationTime": 162,
+    "prepTime": 162,
+    "cookTime": 0,
+    "totalTime": 162,
+    "difficulty": "mittel",
+    "category": "Weihnachten",
+    "categoryIcon": "Cookie",
+    "categories": [
+      "Weihnachten"
+    ],
+    "tags": [],
+    "collectedItems": [],
+    "ingredients": [
+      {
+        "name": "Roggenmehl",
+        "amount": 300,
+        "unit": "g"
+      },
+      {
+        "name": "Weizenmehl",
+        "amount": 200,
+        "unit": "g"
+      },
+      {
+        "name": "Honig",
+        "amount": 250,
+        "unit": "g"
+      },
+      {
+        "name": "Brauner Zucker",
+        "amount": 120,
+        "unit": "g"
+      },
+      {
+        "name": "Eier",
+        "amount": 2,
+        "unit": "Stk"
+      },
+      {
+        "name": "Lebkuchengewürz",
+        "amount": 2,
+        "unit": "EL"
+      },
+      {
+        "name": "Natron",
+        "amount": 1,
+        "unit": "TL"
+      },
+      {
+        "name": "Milch",
+        "amount": 3,
+        "unit": "EL"
+      },
+      {
+        "name": "Mandeln",
+        "amount": 80,
+        "unit": "g",
+        "note": "gehackt oder zum Belegen"
+      }
+    ],
+    "steps": [
+      {
+        "number": 1,
+        "instruction": "Honig und Zucker sanft erwärmen, bis sich der Zucker löst. Lauwarm abkühlen lassen."
+      },
+      {
+        "number": 2,
+        "instruction": "Mehle, Gewürz und Natron mischen. Honigmasse, Eier und Milch einarbeiten."
+      },
+      {
+        "number": 3,
+        "instruction": "Teig zugedeckt mindestens 2 Stunden, besser über Nacht, rasten lassen."
+      },
+      {
+        "number": 4,
+        "instruction": "Ausrollen, ausstechen, mit Mandeln belegen und bei 175 °C etwa 10 bis 12 Minuten backen."
+      },
+      {
+        "number": 5,
+        "instruction": "In einer Dose mit einem Apfelspalt weich werden lassen."
+      }
+    ],
+    "tips": [
+      "Lebkuchen wirkt beim Herausnehmen noch weich; er zieht beim Abkühlen an.",
+      "Den Apfelspalt täglich wechseln."
+    ],
+    "notesFromOriginal": [],
+    "featured": false
+  },
+  {
+    "id": "b743fcf5-9b0e-4475-b94b-cf6cacb855a2",
+    "slug": "spritzgebaeck",
+    "registerLetter": "S",
+    "author": "Gastautor Alois",
+    "authorNote": "",
+    "entryType": "rezept",
+    "title": "Spritzgebäck",
+    "shortDescription": "",
+    "story": "Im S-Register zeigt sich besonders schön, dass Omas Buch ein Gemeinschaftswerk war. Spritzgebäck war so ein Rezept, das jemand mitbrachte, Marianne ausprobierte und dann für die Familie bewahrte.",
+    "originalCardImage": "/images/directus/6e7df131-0314-42fe-93df-1e58d258776b.svg",
+    "coverImage": "/images/directus/6e7df131-0314-42fe-93df-1e58d258776b.svg",
+    "galleryImages": [],
+    "servingsDefault": 45,
+    "servingsUnit": "Portionen",
+    "preparationTime": 77,
+    "prepTime": 77,
+    "cookTime": 0,
+    "totalTime": 77,
+    "difficulty": "mittel",
+    "category": "Kekse",
+    "categoryIcon": "Cookie",
+    "categories": [
+      "Kekse"
+    ],
+    "tags": [],
+    "collectedItems": [],
+    "ingredients": [
+      {
+        "name": "Butter, weich",
+        "amount": 250,
+        "unit": "g"
+      },
+      {
+        "name": "Staubzucker",
+        "amount": 120,
+        "unit": "g"
+      },
+      {
+        "name": "Vanillezucker",
+        "amount": 1,
+        "unit": "Pkg"
+      },
+      {
+        "name": "Ei",
+        "amount": 1,
+        "unit": "Stk"
+      },
+      {
+        "name": "Mehl glatt",
+        "amount": 350,
+        "unit": "g"
+      },
+      {
+        "name": "Speisestärke",
+        "amount": 80,
+        "unit": "g"
+      },
+      {
+        "name": "Salz",
+        "amount": 1,
+        "unit": "Prise"
+      },
+      {
+        "name": "Kuvertüre",
+        "amount": 150,
+        "unit": "g",
+        "note": "zum Tunken"
+      }
+    ],
+    "steps": [
+      {
+        "number": 1,
+        "instruction": "Butter, Staubzucker, Vanillezucker und Salz cremig rühren. Das Ei kurz einarbeiten."
+      },
+      {
+        "number": 2,
+        "instruction": "Mehl und Stärke mischen und nur so lange unterrühren, bis ein weicher Teig entsteht."
+      },
+      {
+        "number": 3,
+        "instruction": "Teig portionsweise durch den Fleischwolf mit Gebäckvorsatz drehen oder mit einem kräftigen Spritzsack aufs Blech setzen."
+      },
+      {
+        "number": 4,
+        "instruction": "Bei 180 °C etwa 10 bis 12 Minuten hell backen und vollständig abkühlen lassen."
+      },
+      {
+        "number": 5,
+        "instruction": "Kuvertüre schmelzen, Gebäckenden eintauchen und auf Backpapier fest werden lassen."
+      }
+    ],
+    "tips": [
+      "Wenn der Teig zu weich ist, 20 Minuten kühlen.",
+      "Nicht dunkel backen; Spritzgebäck soll mürbe und hell bleiben."
+    ],
+    "notesFromOriginal": [],
+    "featured": false
+  }
+]

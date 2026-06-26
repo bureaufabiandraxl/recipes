@@ -1,0 +1,33 @@
+[
+  {
+    "id": "backin-packung",
+    "registerLetter": "E",
+    "type": "fundstueck",
+    "title": "Backin Packung",
+    "description": "Ein ausgeschnittener Packungsrücken mit Eierlikörkuchen-Rezept, als Küchenfundstück eingeklebt.",
+    "caption": "Beispiel-Artefakt: Backpulver-Packung mit Eierlikörkuchen-Rezept.",
+    "image": "/images/directus/a223ed47-96b4-4626-87f3-5b848c1904b2.png",
+    "artifactClass": "artifact-packaging-image"
+  },
+  {
+    "id": "jesus-karte",
+    "registerLetter": "E",
+    "type": "bild",
+    "title": "Jesus Karte",
+    "description": "Auf der Rückseite stand: Immer schön fromm und fröhlich sein.",
+    "caption": "Ikonenbild, lose zwischen den E-Rezepten abgelegt.",
+    "captionLink": "https://commons.wikimedia.org/wiki/File:Spas_vsederzhitel_sinay.jpg",
+    "image": "/images/directus/eabb1a07-7e83-46ef-8c64-8274e244f5f4.png",
+    "artifactClass": "artifact-icon-image"
+  },
+  {
+    "id": "marianne-portrait",
+    "registerLetter": "M",
+    "type": "bild",
+    "title": "Marianne",
+    "description": "Ein Foto von Marianne, lose im Register M abgelegt.",
+    "caption": "Marianne - das Gesicht hinter dem Rezeptschatz.",
+    "image": "/images/directus/ed0b2ed2-d45a-499d-b9a7-1d3dad9851c9.jpg",
+    "artifactClass": "artifact-portrait-image"
+  }
+]

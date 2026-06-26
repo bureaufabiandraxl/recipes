@@ -19,8 +19,11 @@ export const metadata: Metadata = {
   description:
     "Handschriftliche Rezeptkarten aus Omas Küche – neu interpretiert und modern umgesetzt.",
   icons: {
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
+    icon: [
+      { url: "/rezeptschatz-favicon.ico?v=20260626", sizes: "any" },
+      { url: "/rezeptschatz-icon.png?v=20260626", type: "image/png" },
+    ],
+    apple: "/rezeptschatz-apple-icon.png?v=20260626",
   },
 };
 

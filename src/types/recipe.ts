@@ -31,10 +31,14 @@ export interface Recipe {
   coverImage: string;
   galleryImages: string[];
   servingsDefault: number;
+  servingsUnit?: string;
+  preparationTime?: number;
   prepTime: number; // Minuten
   cookTime: number;
   totalTime: number;
   difficulty: "einfach" | "mittel" | "anspruchsvoll";
+  category?: string;
+  categoryIcon?: string;
   categories: string[];
   tags: string[];
   collectedItems: string[];

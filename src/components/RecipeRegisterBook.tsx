@@ -15,10 +15,25 @@ import {
   ReceiptText,
   X,
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
+import type { LucideIcon } from "lucide-react";
 import { collectedBookItems } from "@/data/recipes";
+import generatedArtifacts from "@/data/directus-artifacts.generated.json";
 import type { Recipe } from "@/types/recipe";
+
+interface CollectedBookItem {
+  id: string;
+  registerLetter: string;
+  type: "notiz" | "bild" | "fundstueck";
+  title: string;
+  description: string;
+  caption?: string;
+  captionLink?: string;
+  image?: string;
+  artifactClass?: string;
+}
 
 interface RecipeRegisterBookProps {
   recipes: Recipe[];
@@ -82,6 +97,7 @@ interface RegisterRouteState {
 }
 
 const cardColors = ["#fec8ff", "#deffc8", "#fff36e", "#e3fdff", "#ffb5e5", "#ff9e66"];
+const syncedCollectedBookItems = generatedArtifacts as CollectedBookItem[];
 const recipeColorOverrides: Record<string, string> = {
   kirchtagskrapfen: "#fff36e",
 };
@@ -233,19 +249,11 @@ function formatTime(minutes: number) {
 }
 
 function getCardTimeLabel(recipe: Recipe) {
-  if (recipe.slug === "eiskonfekt") {
-    return "20 Min + Kühlzeit";
-  }
-
-  return formatTime(recipe.totalTime);
+  return formatTime(recipe.preparationTime ?? recipe.totalTime);
 }
 
 function getServingsUnit(recipe: Recipe) {
-  if (recipe.slug === "eiskonfekt") {
-    return "Förmchen";
-  }
-
-  return "Portionen";
+  return recipe.servingsUnit ?? "Portionen";
 }
 
 function getRecipeAuthorLabel(recipe: Recipe) {
@@ -253,11 +261,21 @@ function getRecipeAuthorLabel(recipe: Recipe) {
 }
 
 function getRecipeCategoryLabel(recipe: Recipe) {
-  if (recipe.slug === "eiskonfekt") {
-    return "Kekse";
+  return recipe.category ?? recipe.categories[0] ?? recipe.entryType;
+}
+
+function getRecipeIcon(recipe: Recipe): LucideIcon {
+  const iconName = recipe.categoryIcon;
+
+  if (iconName && iconName in LucideIcons) {
+    const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
+
+    if (typeof Icon === "function") {
+      return Icon as LucideIcon;
+    }
   }
 
-  return recipe.categories[0] ?? recipe.entryType;
+  return recipe.slug === "eierlikoer" ? Martini : Cookie;
 }
 
 function getDifficultyLabel(recipe: Recipe) {
@@ -301,7 +319,8 @@ function formatAmount(amount: number, multiplier: number) {
 
 function getLettersWithEntries(recipes: Recipe[]) {
   const letters = new Set(recipes.map((recipe) => recipe.registerLetter));
-  collectedBookItems.forEach((item) => letters.add(item.registerLetter));
+  const artifactItems = syncedCollectedBookItems.length ? syncedCollectedBookItems : collectedBookItems;
+  artifactItems.forEach((item) => letters.add(item.registerLetter));
   return letters;
 }
 
@@ -466,7 +485,8 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
       },
     }));
 
-  const collectedArtifactItems = collectedBookItems
+  const artifactItems = syncedCollectedBookItems.length ? syncedCollectedBookItems : collectedBookItems;
+  const collectedArtifactItems = artifactItems
     .filter((item) => item.registerLetter === activeLetter)
     .map<BoardItem>((item, index) => {
       const fallbackRecipe = recipes[(index + 1) % recipes.length] ?? recipes[0];
@@ -491,7 +511,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
     });
 
   const exampleArtifactItems: BoardItem[] =
-    activeLetter === "E"
+    !syncedCollectedBookItems.length && activeLetter === "E"
       ? [
           {
             id: "artifact-christus-ikone",
@@ -1296,7 +1316,7 @@ function RecipeDetail({
   const [servings, setServings] = useState(recipe.servingsDefault);
   const [visualMode, setVisualMode] = useState<"recipe" | "photo">("recipe");
   const servingsMultiplier = servings / recipe.servingsDefault;
-  const RecipeIcon = recipe.slug === "eierlikoer" ? Martini : Cookie;
+  const RecipeIcon = getRecipeIcon(recipe);
   const servingsUnit = getServingsUnit(recipe);
   const authorLabel = getRecipeAuthorLabel(recipe);
   const hasPhoto = Boolean(recipe.photoImage);

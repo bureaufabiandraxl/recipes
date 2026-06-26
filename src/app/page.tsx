@@ -1,8 +1,8 @@
 import { RecipeRegisterBook } from "@/components/RecipeRegisterBook";
-import { getAllRecipes } from "@/data/recipes";
+import { getAllRecipesFromDirectus } from "@/lib/directus-recipes";
 
-export default function Home() {
-  const recipes = getAllRecipes();
+export default async function Home() {
+  const recipes = await getAllRecipesFromDirectus();
 
   return (
     <div className="min-h-screen bg-[#fffffa]">
