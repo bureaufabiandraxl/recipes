@@ -858,9 +858,7 @@ select {
   opacity: 0.2;
   pointer-events: none;
   transform: translate3d(1px, 2px, 0) scale(1);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
+  transition: none;
 }
 
 .artifact-icon-image {
@@ -927,8 +925,8 @@ select {
 .artifact-packaging-image:focus-visible::before,
 .artifact-portrait-image:hover::before,
 .artifact-portrait-image:focus-visible::before {
-  opacity: 0.42;
-  transform: translate3d(0, 14px, 0) scale(1.04);
+  opacity: 0.2;
+  transform: translate3d(1px, 2px, 0) scale(1);
 }
 
 .artifact-icon-image.register-board-card-dragging::before,
