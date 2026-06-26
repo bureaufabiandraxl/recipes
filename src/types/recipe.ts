@@ -27,6 +27,7 @@ export interface Recipe {
   shortDescription: string;
   story: string;
   originalCardImage: string;
+  photoImage?: string;
   coverImage: string;
   galleryImages: string[];
   servingsDefault: number;

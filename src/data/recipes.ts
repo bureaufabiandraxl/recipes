@@ -68,6 +68,7 @@ export const recipes: Recipe[] = [
     shortDescription: "Kleine Schoko-Kokos-Würfel aus der Kälte, wie früher aus der Blechdose.",
     story: "Dieses Eiskonfekt hat Oma immer wieder zu Weihnachten für uns gezaubert.",
     originalCardImage: "/images/recipes/eiskonfekt.svg",
+    photoImage: "/images/recipes/eiskonfekt-photo.png",
     coverImage: "/images/recipes/eiskonfekt.svg",
     galleryImages: [],
     servingsDefault: 24,

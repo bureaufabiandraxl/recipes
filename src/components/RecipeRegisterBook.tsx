@@ -677,6 +677,10 @@ function ZoomableImage({
     }));
   }
 
+  useEffect(() => {
+    resetZoom();
+  }, [src]);
+
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -1290,14 +1294,25 @@ function RecipeDetail({
   recipe: Recipe;
 }) {
   const [servings, setServings] = useState(recipe.servingsDefault);
+  const [visualMode, setVisualMode] = useState<"recipe" | "photo">("recipe");
   const servingsMultiplier = servings / recipe.servingsDefault;
   const RecipeIcon = recipe.slug === "eierlikoer" ? Martini : Cookie;
   const servingsUnit = getServingsUnit(recipe);
   const authorLabel = getRecipeAuthorLabel(recipe);
+  const hasPhoto = Boolean(recipe.photoImage);
+  const visualImage =
+    visualMode === "photo" && recipe.photoImage ? recipe.photoImage : recipe.originalCardImage;
+  const visualAlt =
+    visualMode === "photo" ? `Foto zu ${recipe.title}` : `Originalkarte ${recipe.title}`;
 
   function changeServings(nextServings: number) {
     setServings(clamp(nextServings, 1, 99));
   }
+
+  useEffect(() => {
+    setVisualMode("recipe");
+    setServings(recipe.servingsDefault);
+  }, [recipe.servingsDefault, recipe.slug]);
 
   return (
     <div
@@ -1326,23 +1341,44 @@ function RecipeDetail({
         </button>
       </header>
 
-      <div className="recipe-view-graphic">
-        <div className="recipe-view-original">
+      <div className={["recipe-view-graphic", hasPhoto ? "" : "recipe-view-graphic-single-tool"].filter(Boolean).join(" ")}>
+        <div
+          className={[
+            "recipe-view-original",
+            visualMode === "photo" && hasPhoto ? "recipe-view-photo" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
           <ZoomableImage
-            alt={`Originalkarte ${recipe.title}`}
+            alt={visualAlt}
             priority
             sizes="(max-width: 900px) 92vw, 870px"
-            src={recipe.originalCardImage}
+            src={visualImage}
           />
         </div>
-        <div className="recipe-view-mode-switch" aria-label="Ansicht wählen">
-          <button aria-label="Rezepttext anzeigen" className="recipe-view-mode-active" type="button">
-            <ReceiptText aria-hidden="true" size={18} strokeWidth={1.9} />
-          </button>
-          <button aria-label="Foto anzeigen" type="button">
-            <ImageIcon aria-hidden="true" size={18} strokeWidth={1.9} />
-          </button>
-        </div>
+        {hasPhoto ? (
+          <div className="recipe-view-mode-switch" aria-label="Ansicht wählen">
+            <button
+              aria-label="Originalrezept anzeigen"
+              aria-pressed={visualMode === "recipe"}
+              className={visualMode === "recipe" ? "recipe-view-mode-active" : undefined}
+              onClick={() => setVisualMode("recipe")}
+              type="button"
+            >
+              <ReceiptText aria-hidden="true" size={18} strokeWidth={1.9} />
+            </button>
+            <button
+              aria-label="Foto anzeigen"
+              aria-pressed={visualMode === "photo"}
+              className={visualMode === "photo" ? "recipe-view-mode-active" : undefined}
+              onClick={() => setVisualMode("photo")}
+              type="button"
+            >
+              <ImageIcon aria-hidden="true" size={18} strokeWidth={1.9} />
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="recipe-view-content">

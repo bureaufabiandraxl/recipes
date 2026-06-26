@@ -846,6 +846,23 @@ select {
   box-shadow: none;
 }
 
+.artifact-icon-image::before,
+.artifact-packaging-image::before,
+.artifact-portrait-image::before {
+  position: absolute;
+  z-index: 0;
+  border-radius: 22px;
+  background: rgba(34, 31, 27, 0.22);
+  content: "";
+  filter: blur(20px);
+  opacity: 0.2;
+  pointer-events: none;
+  transform: translate3d(1px, 2px, 0) scale(1);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
 .artifact-icon-image {
   width: clamp(145px, 15.2%, 257px);
   height: clamp(270px, 28.4vw, 479px);
@@ -864,19 +881,31 @@ select {
 .artifact-icon-image .register-card-image,
 .artifact-packaging-image .register-card-image,
 .artifact-portrait-image .register-card-image {
+  position: relative;
+  z-index: 1;
   height: 100%;
   overflow: visible;
   border-radius: 0;
+}
+
+.artifact-icon-image::before {
+  inset: 3% 2% -2%;
+}
+
+.artifact-packaging-image::before {
+  inset: 5% 3% 0;
+}
+
+.artifact-portrait-image::before {
+  inset: 3% 2% -2%;
 }
 
 .artifact-icon-image .register-card-image img,
 .artifact-packaging-image .register-card-image img,
 .artifact-portrait-image .register-card-image img {
   padding: 0;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.05));
+  filter: none;
   object-fit: cover;
-  transition: filter 180ms ease;
-  will-change: filter;
 }
 
 .artifact-packaging-image .register-card-image img {
@@ -889,7 +918,30 @@ select {
 .artifact-packaging-image:focus-visible .register-card-image img,
 .artifact-portrait-image:hover .register-card-image img,
 .artifact-portrait-image:focus-visible .register-card-image img {
-  filter: drop-shadow(0 14px 28px rgba(34, 31, 27, 0.16));
+  filter: none;
+}
+
+.artifact-icon-image:hover::before,
+.artifact-icon-image:focus-visible::before,
+.artifact-packaging-image:hover::before,
+.artifact-packaging-image:focus-visible::before,
+.artifact-portrait-image:hover::before,
+.artifact-portrait-image:focus-visible::before {
+  opacity: 0.42;
+  transform: translate3d(0, 14px, 0) scale(1.04);
+}
+
+.artifact-icon-image.register-board-card-dragging::before,
+.artifact-icon-image.register-board-card-dragging:hover::before,
+.artifact-icon-image.register-board-card-dragging:focus-visible::before,
+.artifact-packaging-image.register-board-card-dragging::before,
+.artifact-packaging-image.register-board-card-dragging:hover::before,
+.artifact-packaging-image.register-board-card-dragging:focus-visible::before,
+.artifact-portrait-image.register-board-card-dragging::before,
+.artifact-portrait-image.register-board-card-dragging:hover::before,
+.artifact-portrait-image.register-board-card-dragging:focus-visible::before {
+  opacity: 0;
+  transition: none;
 }
 
 .artifact-icon-image.register-board-card-dragging .register-card-image img,
@@ -902,7 +954,6 @@ select {
 .artifact-portrait-image.register-board-card-dragging:hover .register-card-image img,
 .artifact-portrait-image.register-board-card-dragging:focus-visible .register-card-image img {
   filter: none;
-  transition: none;
 }
 
 .artifact-icon-image .register-card-meta,
@@ -1543,6 +1594,10 @@ select {
   padding: 72px 65px 102px;
 }
 
+.recipe-view-photo .zoomable-image-media {
+  padding: 16px clamp(44px, 14.5vw, 144px) 32px;
+}
+
 .recipe-view-original img,
 .zoomable-image-media {
   object-fit: contain;
@@ -1583,6 +1638,11 @@ select {
 .recipe-view-original .zoomable-image-controls {
   right: calc(50% - 15px);
   bottom: 32px;
+}
+
+.recipe-view-graphic-single-tool .recipe-view-original .zoomable-image-controls {
+  right: 50%;
+  transform: translateX(50%);
 }
 
 .zoomable-image-controls button {
@@ -2637,7 +2697,7 @@ select {
   .register-board-artifact:hover,
   .register-board-artifact:focus-visible {
     box-shadow: none;
-    filter: drop-shadow(0 12px 24px rgba(34, 31, 27, 0.16));
+    filter: none;
   }
 
   .recipe-detail-backdrop {
@@ -2708,9 +2768,17 @@ select {
     padding: 46px 18px 86px;
   }
 
+  .recipe-view-photo .zoomable-image-media {
+    padding: 24px 18px 86px;
+  }
+
   .recipe-view-original .zoomable-image-controls {
     right: calc(50% - 16px);
     bottom: 22px;
+  }
+
+  .recipe-view-graphic-single-tool .recipe-view-original .zoomable-image-controls {
+    right: 50%;
   }
 
   .recipe-view-mode-switch {
