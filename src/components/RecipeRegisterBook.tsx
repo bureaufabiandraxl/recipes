@@ -1473,8 +1473,8 @@ function RecipeDetail({
                         {formatAmount(ingredient.amount, servingsMultiplier)} {ingredient.unit}
                       </span>
                       <div className="recipe-ingredient-text">
-                        <strong>{ingredient.name}</strong>
-                        {ingredient.note ? <small>, {ingredient.note}</small> : null}
+                        <strong>{ingredient.name}{ingredient.note ? "," : ""}</strong>
+                        {ingredient.note ? <span>{ingredient.note}</span> : null}
                       </div>
                     </li>
                   ))}

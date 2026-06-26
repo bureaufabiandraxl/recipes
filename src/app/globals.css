@@ -1988,18 +1988,17 @@ select {
 }
 
 .recipe-ingredient-text {
-  display: flex;
   min-width: 0;
-  flex-wrap: wrap;
   color: #34312c;
   line-height: 24px;
 }
 
-.recipe-ingredient-list small {
+.recipe-ingredient-text span {
   color: #34312c;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
+  margin-left: 0.25em;
 }
 
 .recipe-ingredient-list strong {
