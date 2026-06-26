@@ -9,7 +9,6 @@ interface CollectedBookItem {
   caption?: string;
   captionLink?: string;
   image?: string;
-  artifactClass?: string;
 }
 
 export const recipes: Recipe[] = [
@@ -255,7 +254,6 @@ export const collectedBookItems: CollectedBookItem[] = [
     description: "Ein Foto von Marianne, lose im Register M abgelegt.",
     caption: "Marianne - das Gesicht hinter dem Rezeptschatz.",
     image: "/images/artifacts/marianne-portrait.jpg",
-    artifactClass: "artifact-portrait-image",
   },
 ];
 

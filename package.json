@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/write-build-info.mjs",
     "dev": "next dev",
     "cms:sync": "node scripts/sync-directus.mjs",
     "build": "npm run cms:sync && next build",

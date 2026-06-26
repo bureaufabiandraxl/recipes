@@ -42,7 +42,6 @@ const artifactFields = [
   "artifact_image",
   "artifact_caption",
   "artifact_caption_link",
-  "artifact_class",
 ].join(",");
 
 function extensionFromContentType(contentType, fallback = ".bin") {
@@ -198,7 +197,6 @@ async function main() {
       caption: artifact.artifact_caption ?? undefined,
       captionLink: artifact.artifact_caption_link ?? undefined,
       image: (await downloadAsset(artifact.artifact_image)) ?? "",
-      artifactClass: artifact.artifact_class ?? undefined,
     })),
   );
 

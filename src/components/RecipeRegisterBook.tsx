@@ -32,7 +32,6 @@ interface CollectedBookItem {
   caption?: string;
   captionLink?: string;
   image?: string;
-  artifactClass?: string;
 }
 
 interface RecipeRegisterBookProps {
@@ -67,7 +66,7 @@ type BoardItem =
       color: string;
       rotation: number;
       image: string;
-      artifactClass?: string;
+      artifactType: "notiz" | "bild" | "fundstueck";
       position: BoardPosition;
     };
 
@@ -503,7 +502,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
         color: index % 2 === 0 ? "#fff6df" : "#e7f3ef",
         rotation: 0,
         image: item.image ?? fallbackRecipe?.originalCardImage ?? "/images/recipes/eiskonfekt.svg",
-        artifactClass: item.artifactClass ?? "artifact-note",
+        artifactType: item.type,
         position: defaultPositions[index + recipeItems.length] ?? {
           x: 18 + (index % 3) * 22,
           y: 54 + Math.floor(index / 3) * 22,
@@ -525,7 +524,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
             color: "#ffffff",
             rotation: 0,
             image: "/images/artifacts/jesus.png",
-            artifactClass: "artifact-icon-image",
+            artifactType: "bild",
             position: { x: 46.8, y: 15.5 },
           },
           {
@@ -539,7 +538,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
             color: "#ffffff",
             rotation: 0,
             image: "/images/artifacts/backin.png",
-            artifactClass: "artifact-packaging-image",
+            artifactType: "fundstueck",
             position: { x: 15.6, y: 102.3 },
           },
         ]
@@ -555,19 +554,19 @@ function getEstimatedItemHeight(item: BoardItem) {
     return 430;
   }
 
-  if (item.artifactClass === "artifact-packaging-image") {
+  if (getArtifactDisplayClass(item) === "artifact-image") {
     return 520;
-  }
-
-  if (item.artifactClass === "artifact-icon-image") {
-    return 520;
-  }
-
-  if (item.artifactClass === "artifact-portrait-image") {
-    return 540;
   }
 
   return 430;
+}
+
+function getArtifactDisplayClass(item: BoardItem) {
+  if (item.kind !== "artifact") {
+    return "";
+  }
+
+  return item.artifactType === "notiz" ? "artifact-note" : "artifact-image";
 }
 
 function getItemTopPx(position: BoardPosition) {
@@ -832,6 +831,9 @@ function ZoomableImage({
 export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
   const lettersWithEntries = useMemo(() => getLettersWithEntries(recipes), [recipes]);
   const firstLetter = "intro";
+  const firstAvailableRegisterLetter =
+    registerEntries.find((entry) => entry.type === "letter" && registerEntryHasContent(entry, lettersWithEntries))?.id ??
+    "info";
   const [activeLetter, setActiveLetter] = useState<string>(firstLetter);
   const [layoutSeed, setLayoutSeed] = useState("");
   const [positions, setPositions] = useState<Record<string, BoardPosition>>({});
@@ -966,6 +968,10 @@ ${liquidGlassRuntimeSelectors} {
     setActiveLetter(letter);
     setSelectedItem(null);
     setSelectedItemIdFromRoute(null);
+  }
+
+  function handleCoverOpen() {
+    handleLetterChange(firstAvailableRegisterLetter);
   }
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>, item: BoardItem) {
@@ -1131,27 +1137,33 @@ ${liquidGlassRuntimeSelectors} {
             >
               {activeRegisterEntry?.type === "intro" ? (
                 <section className="register-cover-page" aria-label="Cover">
-                  <div className="register-cover-label">
+                  <button
+                    className="register-cover-label"
+                    onClick={handleCoverOpen}
+                    type="button"
+                  >
                     <Image
-                      alt="Marianne"
-                      className="register-cover-logo"
+                      alt=""
+                      aria-hidden="true"
+                      className="register-cover-label-image register-cover-label-image-desktop"
                       draggable={false}
-                      height={44}
+                      height={433}
                       priority
-                      src="/images/brand/marianne.svg"
-                      width={44}
+                      src="/images/brand/label-desktop.png"
+                      width={611}
                     />
-                    <span className="register-cover-rule register-cover-rule-1" aria-hidden="true" />
-                    <span className="register-cover-rule register-cover-rule-2" aria-hidden="true" />
-                    <span className="register-cover-rule register-cover-rule-3" aria-hidden="true" />
-                    <span className="register-cover-rule register-cover-rule-4" aria-hidden="true" />
-                    <p>
-                      Eine Sammlung der handgeschriebenen Original-
-                      <br />
-                      rezepte meiner Oma.
-                    </p>
-                    <strong>fabiandraxl.com</strong>
-                  </div>
+                    <Image
+                      alt=""
+                      aria-hidden="true"
+                      className="register-cover-label-image register-cover-label-image-mobile"
+                      draggable={false}
+                      height={221}
+                      priority
+                      src="/images/brand/label-mobile.png"
+                      width={312}
+                    />
+                    <span>Erstes Register öffnen</span>
+                  </button>
                 </section>
               ) : activeRegisterEntry?.type === "info" ? (
                 <InfoRegisterPage />
@@ -1164,7 +1176,7 @@ ${liquidGlassRuntimeSelectors} {
                       className={[
                         "register-board-card",
                         item.kind === "artifact" ? "register-board-artifact" : "",
-                        item.kind === "artifact" && item.artifactClass ? item.artifactClass : "",
+                        getArtifactDisplayClass(item),
                         draggingItemId === item.id ? "register-board-card-dragging" : "",
                       ].join(" ")}
                       key={item.id}

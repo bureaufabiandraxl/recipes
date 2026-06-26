@@ -819,6 +819,7 @@ select {
 .register-board-artifact.register-board-card-dragging,
 .register-board-artifact.register-board-card-dragging:hover,
 .register-board-artifact.register-board-card-dragging:focus-visible {
+  box-shadow: none;
   filter: none;
 }
 
@@ -836,49 +837,31 @@ select {
   box-shadow: 0 14px 28px rgba(34, 31, 27, 0.14);
 }
 
-.artifact-icon-image,
-.artifact-packaging-image,
-.artifact-portrait-image {
+.artifact-image {
   display: block;
+  width: clamp(170px, 24vw, 360px);
+  height: clamp(230px, 32vw, 500px);
   min-height: auto;
   padding: 0;
   background: transparent;
   box-shadow: none;
 }
 
-.artifact-icon-image::before,
-.artifact-packaging-image::before,
-.artifact-portrait-image::before {
+.artifact-image::before {
   position: absolute;
+  inset: 3% 2% -2%;
   z-index: 0;
   border-radius: 22px;
   background: rgba(34, 31, 27, 0.22);
   content: "";
   filter: blur(20px);
-  opacity: 0.2;
+  opacity: 0;
   pointer-events: none;
   transform: translate3d(1px, 2px, 0) scale(1);
   transition: none;
 }
 
-.artifact-icon-image {
-  width: clamp(145px, 15.2%, 257px);
-  height: clamp(270px, 28.4vw, 479px);
-}
-
-.artifact-packaging-image {
-  width: clamp(275px, 29%, 490px);
-  height: clamp(275px, 29vw, 490px);
-}
-
-.artifact-portrait-image {
-  width: clamp(220px, 22vw, 360px);
-  height: clamp(300px, 34vw, 500px);
-}
-
-.artifact-icon-image .register-card-image,
-.artifact-packaging-image .register-card-image,
-.artifact-portrait-image .register-card-image {
+.artifact-image .register-card-image {
   position: relative;
   z-index: 1;
   height: 100%;
@@ -886,77 +869,39 @@ select {
   border-radius: 0;
 }
 
-.artifact-icon-image::before {
-  inset: 3% 2% -2%;
-}
-
-.artifact-packaging-image::before {
-  inset: 5% 3% 0;
-}
-
-.artifact-portrait-image::before {
-  inset: 3% 2% -2%;
-}
-
-.artifact-icon-image .register-card-image img,
-.artifact-packaging-image .register-card-image img,
-.artifact-portrait-image .register-card-image img {
+.artifact-image .register-card-image img {
   padding: 0;
-  filter: none;
-  object-fit: cover;
-}
-
-.artifact-packaging-image .register-card-image img {
+  filter: drop-shadow(0 8px 14px rgba(34, 31, 27, 0.1));
   object-fit: contain;
 }
 
-.artifact-icon-image:hover .register-card-image img,
-.artifact-icon-image:focus-visible .register-card-image img,
-.artifact-packaging-image:hover .register-card-image img,
-.artifact-packaging-image:focus-visible .register-card-image img,
-.artifact-portrait-image:hover .register-card-image img,
-.artifact-portrait-image:focus-visible .register-card-image img {
-  filter: none;
+.artifact-image:hover .register-card-image img,
+.artifact-image:focus-visible .register-card-image img {
+  filter:
+    drop-shadow(0 10px 18px rgba(34, 31, 27, 0.16))
+    drop-shadow(0 22px 32px rgba(34, 31, 27, 0.1));
 }
 
-.artifact-icon-image:hover::before,
-.artifact-icon-image:focus-visible::before,
-.artifact-packaging-image:hover::before,
-.artifact-packaging-image:focus-visible::before,
-.artifact-portrait-image:hover::before,
-.artifact-portrait-image:focus-visible::before {
-  opacity: 0.2;
+.artifact-image:hover::before,
+.artifact-image:focus-visible::before {
+  opacity: 0;
   transform: translate3d(1px, 2px, 0) scale(1);
 }
 
-.artifact-icon-image.register-board-card-dragging::before,
-.artifact-icon-image.register-board-card-dragging:hover::before,
-.artifact-icon-image.register-board-card-dragging:focus-visible::before,
-.artifact-packaging-image.register-board-card-dragging::before,
-.artifact-packaging-image.register-board-card-dragging:hover::before,
-.artifact-packaging-image.register-board-card-dragging:focus-visible::before,
-.artifact-portrait-image.register-board-card-dragging::before,
-.artifact-portrait-image.register-board-card-dragging:hover::before,
-.artifact-portrait-image.register-board-card-dragging:focus-visible::before {
+.artifact-image.register-board-card-dragging::before,
+.artifact-image.register-board-card-dragging:hover::before,
+.artifact-image.register-board-card-dragging:focus-visible::before {
   opacity: 0;
   transition: none;
 }
 
-.artifact-icon-image.register-board-card-dragging .register-card-image img,
-.artifact-icon-image.register-board-card-dragging:hover .register-card-image img,
-.artifact-icon-image.register-board-card-dragging:focus-visible .register-card-image img,
-.artifact-packaging-image.register-board-card-dragging .register-card-image img,
-.artifact-packaging-image.register-board-card-dragging:hover .register-card-image img,
-.artifact-packaging-image.register-board-card-dragging:focus-visible .register-card-image img,
-.artifact-portrait-image.register-board-card-dragging .register-card-image img,
-.artifact-portrait-image.register-board-card-dragging:hover .register-card-image img,
-.artifact-portrait-image.register-board-card-dragging:focus-visible .register-card-image img {
+.artifact-image.register-board-card-dragging .register-card-image img,
+.artifact-image.register-board-card-dragging:hover .register-card-image img,
+.artifact-image.register-board-card-dragging:focus-visible .register-card-image img {
   filter: none;
 }
 
-.artifact-icon-image .register-card-meta,
-.artifact-packaging-image .register-card-meta,
-.artifact-portrait-image .register-card-meta {
+.artifact-image .register-card-meta {
   display: none;
 }
 
@@ -1220,62 +1165,41 @@ select {
 .register-cover-label {
   position: relative;
   isolation: isolate;
-  display: grid;
-  width: clamp(480px, 46vw, 781px);
-  min-height: clamp(292px, 27.4vw, 465px);
-  grid-template-rows: repeat(4, 1px) auto;
-  row-gap: clamp(38px, 3.68vw, 64px);
-  align-content: end;
-  place-items: center;
-  border-radius: clamp(18px, 1.84vw, 32px);
-  background: #fffffa;
-  padding: clamp(72px, 7.36vw, 127px) clamp(36px, 3.68vw, 64px)
-    clamp(38px, 3.68vw, 64px);
-  color: #232319;
-  text-align: center;
-  box-shadow: 0.994px 0.994px 3.974px rgba(0, 0, 0, 0.05);
-}
-
-.register-cover-logo {
-  position: absolute;
-  top: clamp(40px, 3.88vw, 67px);
-  left: clamp(49px, 4.72vw, 82px);
-  z-index: 2;
+  width: clamp(300px, 38vw, 420px);
+  aspect-ratio: 611 / 433;
   display: block;
-  width: clamp(44px, 4.28vw, 74px);
-  height: clamp(51px, 4.94vw, 85px);
-  object-fit: contain;
-  transform: rotate(-6.07deg);
-  transform-origin: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  transform: translateY(-7%);
 }
 
-.register-cover-rule {
-  width: 100%;
+.register-cover-label:focus-visible {
+  outline: 2px solid rgba(255, 255, 250, 0.88);
+  outline-offset: 8px;
+}
+
+.register-cover-label span {
+  position: absolute;
+  width: 1px;
   height: 1px;
-  margin: 0;
-  background: rgba(234, 92, 88, 0.26);
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.register-cover-label p {
-  position: absolute;
-  top: clamp(73px, 7.42vw, 128px);
-  left: 50%;
-  z-index: 1;
-  width: calc(100% - clamp(72px, 7.36vw, 127px));
-  color: #232319;
-  font-size: clamp(1.35rem, 2.07vw, 2.235rem);
-  font-weight: 400;
-  line-height: 1.78;
-  transform: translateX(-50%);
-}
-
-.register-cover-label strong {
+.register-cover-label-image {
   display: block;
   width: 100%;
-  color: var(--register-info);
-  font-size: clamp(0.78rem, 1.15vw, 1.242rem);
-  font-weight: 400;
-  line-height: 1.2;
+  height: 100%;
+  object-fit: contain;
+}
+
+.register-cover-label-image-mobile {
+  display: none;
 }
 
 .register-special-page {
@@ -2327,8 +2251,8 @@ select {
   .register-book-frame {
     height: 100svh;
     min-height: 0;
-    grid-template-columns: 1fr;
-    grid-template-rows: 36px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 59px minmax(0, 1fr);
     border: 0;
     border-radius: 0;
   }
@@ -2342,14 +2266,16 @@ select {
     top: 0;
     z-index: 4;
     display: flex;
-    height: 36px;
+    box-sizing: border-box;
+    height: 59px;
     align-items: flex-start;
     gap: 1px;
     overflow-x: auto;
-    overflow-y: visible;
+    overflow-y: hidden;
     border-bottom: 0;
+    box-shadow: none;
     background: #cacaca;
-    padding: 4px 16px 0;
+    padding: 6px 16px 0;
     scrollbar-width: none;
   }
 
@@ -2362,39 +2288,44 @@ select {
     position: relative;
     z-index: var(--register-tab-stack, 1);
     display: grid;
-    flex: 0 0 24px;
-    width: 24px;
-    min-width: 24px;
-    height: 32px;
+    flex: 0 0 38px;
+    width: 38px;
+    min-width: 38px;
+    height: 53px;
     place-items: center;
     border: 0;
     border-radius: 0;
     background: transparent;
     color: #181816;
-    font-size: 0.68rem;
+    font-size: 1.08rem;
     font-weight: 400;
     line-height: 1;
     padding: 0;
   }
 
   .register-mobile-tab-wide {
-    flex-basis: 34px;
-    width: 34px;
-    min-width: 34px;
-    font-size: 0.58rem;
+    flex-basis: 54px;
+    width: 54px;
+    min-width: 54px;
     font-weight: 400;
   }
 
   .register-mobile-tab-shape {
     position: absolute;
     top: 0;
-    left: -5.0625px;
+    left: -8.1px;
     z-index: 0;
-    width: calc(100% + 10.125px);
-    height: 32px;
+    width: calc(100% + 16.2px);
+    height: 53px;
     overflow: visible;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.035));
+    filter:
+      drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.07))
+      drop-shadow(0 3px 5px rgba(0, 0, 0, 0.07));
     pointer-events: none;
+  }
+
+  .register-mobile-tab-active .register-mobile-tab-shape {
+    filter: none;
   }
 
   .register-mobile-tab-shape path {
@@ -2403,11 +2334,16 @@ select {
 
   .register-mobile-tab-label {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     display: grid;
     width: 100%;
     height: 100%;
     place-items: center;
+  }
+
+  .register-mobile-tab-label svg {
+    width: 29px;
+    height: 29px;
   }
 
   .register-mobile-tab-filled {
@@ -2430,11 +2366,19 @@ select {
   }
 
   .register-mobile-tab-intro img {
+    width: 27px;
+    height: 27px;
     filter: invert(1);
   }
 
   .register-mobile-tab-info {
     --tab-fill: var(--register-info);
+  }
+
+  .register-mobile-tab-info .register-mobile-tab-label svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.8;
   }
 
   .register-mobile-tab-active {
@@ -2463,6 +2407,12 @@ select {
 
   .recipe-register-canvas {
     min-height: max(100%, var(--register-canvas-min-height, 900px));
+    margin-top: 0;
+  }
+
+  .recipe-register-canvas.recipe-register-canvas-cover {
+    display: grid;
+    min-height: calc(100svh - 59px);
   }
 
   .register-board-card:not(.register-board-artifact) {
@@ -2494,39 +2444,17 @@ select {
   }
 
   .register-cover-label {
-    width: min(184px, calc(100% - 80px));
-    min-height: 110px;
-    grid-template-rows: repeat(4, 1px) auto;
-    row-gap: 13px;
-    align-content: end;
-    align-self: start;
-    margin-top: 73px;
-    border-radius: 6px;
-    padding: 30px 17px 11px;
+    width: clamp(240px, 76vw, 312px);
+    aspect-ratio: 312 / 221;
+    transform: translateY(calc(-8% - 100px));
   }
 
-  .register-cover-logo {
-    top: 13px;
-    left: 19px;
-    width: 24px;
-    height: 28px;
+  .register-cover-label-image-desktop {
+    display: none;
   }
 
-  .register-cover-rule {
-    margin: 0;
-  }
-
-  .register-cover-label p {
-    top: 30px;
-    width: calc(100% - 34px);
-    font-size: 0.56rem;
-    line-height: 1.78;
-  }
-
-  .register-cover-label strong {
-    width: 100%;
-    font-size: 0.38rem;
-    line-height: 1.2;
+  .register-cover-label-image-mobile {
+    display: block;
   }
 
   .recipe-detail-grid,
@@ -2562,6 +2490,11 @@ select {
     padding: 0;
   }
 
+  .recipe-register-canvas.recipe-register-canvas-cover {
+    display: grid;
+    min-height: calc(100svh - 59px);
+  }
+
   .register-board-card:not(.register-board-artifact) {
     position: absolute;
     width: min(82vw, 320px);
@@ -2578,24 +2511,10 @@ select {
     grid-template-rows: minmax(86px, 1fr) 34px;
   }
 
-  .artifact-icon-image,
-  .artifact-packaging-image {
+  .artifact-image {
+    width: clamp(132px, 42vw, 210px);
+    height: clamp(178px, 58vw, 290px);
     min-height: 0;
-  }
-
-  .artifact-icon-image {
-    width: clamp(96px, 32vw, 130px);
-    height: clamp(178px, 60vw, 242px);
-  }
-
-  .artifact-packaging-image {
-    width: clamp(152px, 44vw, 190px);
-    height: clamp(152px, 44vw, 190px);
-  }
-
-  .artifact-portrait-image {
-    width: clamp(150px, 42vw, 210px);
-    height: clamp(210px, 58vw, 290px);
   }
 
   .register-card-image img {
@@ -2682,9 +2601,7 @@ select {
     font-size: 1rem;
   }
 
-  .artifact-icon-image,
-  .artifact-packaging-image,
-  .artifact-portrait-image {
+  .artifact-image {
     min-height: 0;
   }
 
