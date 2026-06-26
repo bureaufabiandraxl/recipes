@@ -1979,7 +1979,7 @@ select {
   line-height: 24px;
 }
 
-.recipe-ingredient-list span {
+.recipe-ingredient-list > li > span {
   color: #181816;
   font-weight: 700;
   white-space: nowrap;
@@ -1989,6 +1989,7 @@ select {
   min-width: 0;
   color: #34312c;
   line-height: 24px;
+  overflow-wrap: break-word;
 }
 
 .recipe-ingredient-text span {
@@ -1997,11 +1998,13 @@ select {
   font-weight: 400;
   line-height: 24px;
   margin-left: 0.25em;
+  white-space: normal;
 }
 
 .recipe-ingredient-list strong {
   color: #34312c;
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .recipe-step-list {
