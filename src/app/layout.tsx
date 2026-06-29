@@ -18,12 +18,20 @@ export const metadata: Metadata = {
   title: "Mariannes Rezept-Schatz",
   description:
     "Handschriftliche Rezeptkarten aus Omas Küche – neu interpretiert und modern umgesetzt.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    title: "Rezeptschatz",
+  },
   icons: {
     icon: [
-      { url: "/rezeptschatz-favicon.ico?v=20260626", sizes: "any" },
-      { url: "/rezeptschatz-icon.png?v=20260626", type: "image/png" },
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon0.svg", type: "image/svg+xml" },
+      { url: "/icon1.png", type: "image/png", sizes: "96x96" },
     ],
-    apple: "/rezeptschatz-apple-icon.png?v=20260626",
+    apple: "/apple-icon.png",
+  },
+  other: {
+    "apple-mobile-web-app-title": "Rezeptschatz",
   },
 };
 

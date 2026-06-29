@@ -1,15 +1,5 @@
 [
   {
-    "id": "anita-cover",
-    "registerLetter": "A",
-    "type": "fundstueck",
-    "title": "Anita Cover",
-    "description": "Design Mitteilungen im Anita Design",
-    "caption": "Testunterschrift",
-    "captionLink": "https://anita.vision",
-    "image": "/images/directus/6a43a917-9deb-48b6-9399-4b746a5525b5.jpg"
-  },
-  {
     "id": "backin-packung",
     "registerLetter": "E",
     "type": "fundstueck",

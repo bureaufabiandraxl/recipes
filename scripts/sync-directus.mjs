@@ -2,8 +2,33 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 
 const root = process.cwd();
-const directusUrl = process.env.DIRECTUS_URL ?? "https://rezeptschatz-cms.fabiandraxl.com";
+const localEnvPath = join(root, ".env.local");
 const tokenPath = "/private/tmp/rezeptschatz-directus-token";
+
+function loadLocalEnv() {
+  if (!existsSync(localEnvPath)) return;
+
+  const lines = readFileSync(localEnvPath, "utf8").split(/\r?\n/);
+
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine || trimmedLine.startsWith("#")) continue;
+
+    const separatorIndex = trimmedLine.indexOf("=");
+    if (separatorIndex === -1) continue;
+
+    const key = trimmedLine.slice(0, separatorIndex).trim();
+    const value = trimmedLine.slice(separatorIndex + 1).trim().replace(/^['"]|['"]$/g, "");
+
+    if (key && process.env[key] == null) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadLocalEnv();
+
+const directusUrl = process.env.DIRECTUS_URL ?? "https://rezeptschatz-cms.fabiandraxl.com";
 const directusToken =
   process.env.DIRECTUS_TOKEN ?? (existsSync(tokenPath) ? readFileSync(tokenPath, "utf8").trim() : "");
 
