@@ -24,6 +24,7 @@ export interface Recipe {
   authorNote: string;
   entryType: "rezept" | "notiz" | "bild" | "fundstueck";
   title: string;
+  cardColor?: string;
   shortDescription: string;
   story: string;
   originalCardImage: string;

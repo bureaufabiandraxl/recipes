@@ -475,7 +475,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
       kind: "recipe",
       registerLetter: recipe.registerLetter,
       title: recipe.title,
-      color: recipeColorOverrides[recipe.slug] ?? cardColors[index % cardColors.length],
+      color: recipe.cardColor ?? recipeColorOverrides[recipe.slug] ?? cardColors[index % cardColors.length],
       rotation: 0,
       image: recipe.originalCardImage,
       recipe,
@@ -926,6 +926,18 @@ ${liquidGlassRuntimeSelectors} {
   }, [boardItems, selectedItemIdFromRoute]);
   const activeRegisterEntry = registerEntries.find((entry) => entry.id === activeLetter);
   const isSpecialRegisterPage = activeRegisterEntry?.type === "intro" || activeRegisterEntry?.type === "info";
+  const activeRegisterBackground =
+    activeRegisterEntry?.type === "intro"
+      ? "#232319"
+      : activeRegisterEntry?.type === "info"
+        ? "#ef4044"
+        : "#fffffa";
+  const activeOverscrollBackground =
+    selectedItem?.kind === "recipe"
+      ? selectedItem.color
+      : selectedItem?.kind === "artifact"
+        ? "#f5f4f0"
+        : activeRegisterBackground;
   const canvasMinHeight = useMemo(() => {
     if (isSpecialRegisterPage) {
       return registerPageBaseHeight;
@@ -944,6 +956,18 @@ ${liquidGlassRuntimeSelectors} {
 
     return getRegisterPageHeight(Math.max(registerPageBaseHeight, defaultLayoutHeight, densityHeight));
   }, [boardItems, isSpecialRegisterPage]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--rezeptschatz-overscroll-bg", activeOverscrollBackground);
+    document.documentElement.style.background = activeOverscrollBackground;
+    document.body.style.background = activeOverscrollBackground;
+
+    return () => {
+      document.documentElement.style.removeProperty("--rezeptschatz-overscroll-bg");
+      document.documentElement.style.background = "";
+      document.body.style.background = "";
+    };
+  }, [activeOverscrollBackground]);
 
   function getItemPosition(item: BoardItem) {
     return positions[item.id] ?? item.position;
@@ -1068,7 +1092,11 @@ ${liquidGlassRuntimeSelectors} {
   }
 
   return (
-    <section className="register-book-stage" aria-label="Mariannes Rezeptschatz">
+    <section
+      className="register-book-stage"
+      aria-label="Mariannes Rezeptschatz"
+      style={{ "--register-active-bg": activeRegisterBackground } as CSSProperties}
+    >
       <div className="register-book-frame">
         <nav className="register-mobile-tabs" aria-label="Register">
           {registerEntries.map((entry, index) => {
@@ -1137,33 +1165,35 @@ ${liquidGlassRuntimeSelectors} {
             >
               {activeRegisterEntry?.type === "intro" ? (
                 <section className="register-cover-page" aria-label="Cover">
-                  <button
-                    className="register-cover-label"
-                    onClick={handleCoverOpen}
-                    type="button"
-                  >
-                    <Image
-                      alt=""
-                      aria-hidden="true"
-                      className="register-cover-label-image register-cover-label-image-desktop"
-                      draggable={false}
-                      height={433}
-                      priority
-                      src="/images/brand/label-desktop.png"
-                      width={611}
-                    />
-                    <Image
-                      alt=""
-                      aria-hidden="true"
-                      className="register-cover-label-image register-cover-label-image-mobile"
-                      draggable={false}
-                      height={221}
-                      priority
-                      src="/images/brand/label-mobile.png"
-                      width={312}
-                    />
-                    <span>Erstes Register öffnen</span>
-                  </button>
+                  <div className="register-cover-content">
+                    <button
+                      className="register-cover-label"
+                      onClick={handleCoverOpen}
+                      type="button"
+                    >
+                      <Image
+                        alt=""
+                        aria-hidden="true"
+                        className="register-cover-label-image"
+                        draggable={false}
+                        height={1395}
+                        priority
+                        src="/images/brand/register-book-label.png"
+                        width={2222}
+                      />
+                      <span>Erstes Register öffnen</span>
+                    </button>
+                    <div className="register-cover-intro">
+                      <p>
+                        Mariannes Rezeptschatz ist ein digitales Registerbuch aus handschriftlichen
+                        Rezeptkarten, losen Fundstücken und kleinen Erinnerungen aus Omas Küche.
+                      </p>
+                      <p>
+                        Zwischen den Buchstaben liegen Originale, neu aufbereitete Rezepte und
+                        Beiträge von Gastautorinnen. Zum Schmökern, Wiederfinden und Weitergeben.
+                      </p>
+                    </div>
+                  </div>
                 </section>
               ) : activeRegisterEntry?.type === "info" ? (
                 <InfoRegisterPage />

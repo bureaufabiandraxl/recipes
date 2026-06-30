@@ -42,6 +42,7 @@ const fields = [
   "register_letter",
   "entry_type",
   "title",
+  "card_color",
   "story",
   "author",
   "original_card_image",
@@ -143,8 +144,18 @@ function normalizeIngredients(ingredients) {
     amount:
       ingredient?.amount === "" || ingredient?.amount === null || ingredient?.amount === undefined
         ? 0
-        : Number(ingredient.amount),
+      : Number(ingredient.amount),
   }));
+}
+
+function normalizeColor(value) {
+  const color = String(value ?? "").trim();
+
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color)) {
+    return color.toLowerCase();
+  }
+
+  return undefined;
 }
 
 async function main() {
@@ -179,6 +190,7 @@ async function main() {
         authorNote: "",
         entryType: recipe.entry_type ?? "rezept",
         title: recipe.title ?? "Ohne Titel",
+        cardColor: normalizeColor(recipe.card_color),
         shortDescription: "",
         story: recipe.story ?? "",
         originalCardImage: originalCardImage ?? "",
