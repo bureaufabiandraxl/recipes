@@ -158,6 +158,10 @@ function normalizeColor(value) {
   return undefined;
 }
 
+function encodeFilter(filter) {
+  return encodeURIComponent(JSON.stringify(filter));
+}
+
 async function main() {
   mkdirSync(join(root, "src/data"), { recursive: true });
   mkdirSync(generatedImagesDir, { recursive: true });
@@ -169,17 +173,22 @@ async function main() {
     return;
   }
 
+  const recipeFilter = encodeFilter({
+    status: { _eq: "published" },
+    entry_type: { _in: ["rezept", "rezeptkarte"] },
+  });
   const response = await directusFetch(
-    `/items/recipes?filter[status][_eq]=published&filter[entry_type][_eq]=rezept&sort=sort,title&limit=-1&fields=${fields}`,
+    `/items/recipes?filter=${recipeFilter}&sort=sort,title&limit=-1&fields=${fields}`,
   );
   const result = await response.json();
 
   const recipes = await Promise.all(
     result.data.map(async (recipe) => {
+      const isRecipeCardOnly = recipe.entry_type === "rezeptkarte";
       const originalCardImage = await downloadAsset(recipe.original_card_image);
-      const photoImage = await downloadAsset(recipe.photo_image);
-      const preparationTime = recipe.preparation_time ?? 0;
-      const category = recipe.category ?? undefined;
+      const photoImage = isRecipeCardOnly ? undefined : await downloadAsset(recipe.photo_image);
+      const preparationTime = isRecipeCardOnly ? 0 : recipe.preparation_time ?? 0;
+      const category = isRecipeCardOnly ? undefined : recipe.category ?? undefined;
       const slug = slugify(recipe.slug ?? recipe.title, recipe.id);
 
       return {
@@ -190,7 +199,7 @@ async function main() {
         authorNote: "",
         entryType: recipe.entry_type ?? "rezept",
         title: recipe.title ?? "Ohne Titel",
-        cardColor: normalizeColor(recipe.card_color),
+        cardColor: isRecipeCardOnly ? undefined : normalizeColor(recipe.card_color),
         shortDescription: "",
         story: recipe.story ?? "",
         originalCardImage: originalCardImage ?? "",
@@ -203,15 +212,15 @@ async function main() {
         prepTime: preparationTime,
         cookTime: 0,
         totalTime: preparationTime,
-        difficulty: recipe.difficulty ?? "einfach",
+        difficulty: isRecipeCardOnly ? "einfach" : recipe.difficulty ?? "einfach",
         category,
-        categoryIcon: recipe.category_icon ?? undefined,
+        categoryIcon: isRecipeCardOnly ? undefined : recipe.category_icon ?? undefined,
         categories: category ? [category] : [],
         tags: [],
         collectedItems: [],
-        ingredients: normalizeIngredients(recipe.ingredients),
-        steps: recipe.steps ?? [],
-        tips: normalizeTips(recipe.tips),
+        ingredients: isRecipeCardOnly ? [] : normalizeIngredients(recipe.ingredients),
+        steps: isRecipeCardOnly ? [] : recipe.steps ?? [],
+        tips: isRecipeCardOnly ? [] : normalizeTips(recipe.tips),
         notesFromOriginal: [],
         featured: false,
       };
@@ -220,8 +229,12 @@ async function main() {
 
   writeFileSync(generatedDataPath, `${JSON.stringify(recipes, null, 2)}\n`);
 
+  const artifactFilter = encodeFilter({
+    status: { _eq: "published" },
+    entry_type: { _in: ["notiz", "bild", "fundstueck"] },
+  });
   const artifactResponse = await directusFetch(
-    `/items/recipes?filter[status][_eq]=published&filter[entry_type][_neq]=rezept&sort=sort,title&limit=-1&fields=${artifactFields}`,
+    `/items/recipes?filter=${artifactFilter}&sort=sort,title&limit=-1&fields=${artifactFields}`,
   );
   const artifactResult = await artifactResponse.json();
   const artifacts = await Promise.all(

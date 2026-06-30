@@ -22,7 +22,7 @@ export interface Recipe {
   registerLetter: string;
   author: string;
   authorNote: string;
-  entryType: "rezept" | "notiz" | "bild" | "fundstueck";
+  entryType: "rezept" | "rezeptkarte" | "notiz" | "bild" | "fundstueck";
   title: string;
   cardColor?: string;
   shortDescription: string;

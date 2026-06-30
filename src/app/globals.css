@@ -590,7 +590,7 @@ select {
   --register-tab: #f5f4f0;
   --register-corner: 6.32px;
   --register-cover: #232319;
-  --register-info: #ef4044;
+  --register-info: #f5f4f0;
   --register-active-bg: var(--register-paper);
   min-height: 100svh;
   background: var(--register-active-bg);
@@ -1159,6 +1159,531 @@ select {
   color: #fffffa;
 }
 
+.register-launch-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  min-height: 100svh;
+  place-items: stretch center;
+  overflow: hidden;
+  background: #fffffa;
+  transform-style: preserve-3d;
+  transition:
+    background 560ms ease,
+    opacity 520ms ease;
+}
+
+.register-launch-cover-button {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  perspective: 1800px;
+  perspective-origin: 42% 50%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.register-launch-cover-button:focus-visible {
+  outline: 0;
+}
+
+.register-launch-cover-button:focus-visible .register-launch-front {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 250, 0.86),
+    2px 1px 1.5px rgba(0, 0, 0, 0.3);
+}
+
+.register-launch-book {
+  --cover-spine-width: clamp(120px, 9.259vw, 160px);
+  --cover-corner-size: clamp(72px, 5.787vw, 100px);
+  position: relative;
+  display: block;
+  width: min(100vw, 1728px);
+  height: 100%;
+  min-height: 100svh;
+  margin: 0 auto;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  transition:
+    opacity 520ms ease,
+    transform 940ms cubic-bezier(0.22, 0.68, 0.18, 1);
+  will-change: transform;
+}
+
+.register-launch-spine {
+  position: relative;
+  z-index: 2;
+  display: block;
+  overflow: hidden;
+  width: var(--cover-spine-width);
+  height: 100%;
+  background:
+    linear-gradient(
+      270deg,
+      rgba(255, 255, 255, 0.2) 10.096%,
+      rgba(255, 255, 255, 0.2) 73.558%,
+      rgba(29, 29, 27, 0.2) 77.385%,
+      rgba(152, 152, 152, 0.2) 77.395%,
+      rgba(53, 53, 53, 0.2) 77.395%,
+      rgba(255, 255, 255, 0.2) 93.668%,
+      rgba(0, 0, 0, 0.2) 100%
+    ),
+    url("/images/brand/cover-linen-texture.png") top left / 461px 577px repeat;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.25);
+}
+
+.register-launch-spine::before,
+.register-launch-spine::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.register-launch-spine::before {
+  right: 0;
+  width: 1px;
+  background: rgba(255, 255, 250, 0.2);
+}
+
+.register-launch-spine::after {
+  display: none;
+}
+
+.register-launch-front {
+  position: absolute;
+  inset: 0 0 0 var(--cover-spine-width);
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  overflow: hidden;
+  background: #232319;
+  padding: 0 16px 80px;
+  box-shadow: 2px 1px 3px rgba(0, 0, 0, 0.3);
+  transform: rotateY(0deg) translate3d(0, 0, 0);
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition:
+    opacity 460ms ease,
+    filter 640ms ease;
+}
+
+.register-launch-front::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("/images/brand/cover-kroko-texture.png") center / cover;
+  content: "";
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.register-launch-front::after {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: clamp(28px, 2.6vw, 45px);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.08) 42%,
+      rgba(255, 255, 250, 0) 100%
+    );
+  content: "";
+  mix-blend-mode: multiply;
+  opacity: 0.44;
+  pointer-events: none;
+}
+
+.register-launch-linen-corner {
+  position: absolute;
+  right: 0;
+  z-index: 2;
+  width: var(--cover-corner-size);
+  height: var(--cover-corner-size);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 250, 0.34), rgba(24, 24, 22, 0.1)),
+    url("/images/brand/cover-linen-texture.png") top left / 461px 577px repeat;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.register-launch-linen-corner-top {
+  top: 0;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+
+.register-launch-linen-corner-bottom {
+  bottom: 0;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+.register-launch-label {
+  width: clamp(320px, 31.8vw, 549px);
+  height: auto;
+  max-width: min(72vw, 549px);
+  filter: drop-shadow(0 0.85px 1.7px rgba(0, 0, 0, 0.25));
+  transform: translateZ(1px);
+}
+
+.register-launch-cover-opening {
+  background: rgba(255, 255, 250, 0);
+  pointer-events: none;
+}
+
+.register-launch-cover-opening .register-launch-book {
+  opacity: 0.86;
+  transform: translate3d(-118vw, 0, 0) rotateY(-7deg) skewY(-0.8deg);
+}
+
+.register-launch-cover-opening .register-launch-front {
+  opacity: 0.72;
+  filter: brightness(0.82) saturate(0.92);
+}
+
+.register-launch-cover-opening .register-launch-label {
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.24));
+}
+
+.register-floating-menu {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 46;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+  padding: 6px;
+  box-shadow: var(--liquid-glass-shadow);
+  transform: translateX(-50%);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.register-floating-menu button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #181816;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1;
+  padding: 0 14px;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.register-floating-menu button:hover,
+.register-floating-menu button:focus-visible {
+  background: rgba(255, 255, 255, 0.5);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.register-floating-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  overflow: hidden;
+  background: rgba(255, 255, 250, 0.28);
+  padding: clamp(18px, 4vw, 48px);
+  backdrop-filter: blur(26px) saturate(1.06);
+  -webkit-backdrop-filter: blur(26px) saturate(1.06);
+  animation: floating-panel-backdrop-in 180ms ease both;
+}
+
+.register-floating-panel {
+  position: relative;
+  width: min(880px, 100%);
+  max-height: min(820px, calc(100svh - 48px));
+  overflow: auto;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow:
+    0 24px 72px rgba(24, 24, 22, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.34);
+  scrollbar-width: none;
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+  animation: floating-panel-morph-in 260ms cubic-bezier(0.2, 0.78, 0.2, 1) both;
+  transform-origin: 50% calc(100% + 72px);
+}
+
+.register-floating-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.register-floating-panel-intro {
+  width: min(1160px, 100%);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.register-floating-panel-search {
+  width: min(760px, 100%);
+  height: min(760px, calc(100svh - 48px));
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.register-floating-panel-close {
+  position: sticky;
+  top: 18px;
+  z-index: 5;
+  float: right;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.36);
+  color: #181816;
+  cursor: pointer;
+  margin: 18px 18px 0 0;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.register-floating-panel-close:hover,
+.register-floating-panel-close:focus-visible {
+  background: rgba(255, 255, 255, 0.5);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.register-intro-panel {
+  display: grid;
+  gap: clamp(38px, 5vw, 72px);
+  padding: clamp(42px, 7vw, 92px);
+  color: #181816;
+}
+
+.register-intro-hero {
+  display: grid;
+  max-width: 820px;
+  gap: clamp(20px, 3vw, 34px);
+}
+
+.register-intro-hero > span,
+.register-search-heading > span,
+.register-search-count {
+  color: rgba(24, 24, 22, 0.52);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.register-intro-hero h2,
+.register-search-heading h2 {
+  max-width: 760px;
+  color: #181816;
+  font-size: clamp(3.1rem, 8vw, 7.4rem);
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 0.86;
+}
+
+.register-intro-copy {
+  display: grid;
+  max-width: 720px;
+  gap: 16px;
+}
+
+.register-intro-copy p {
+  margin: 0;
+  color: rgba(24, 24, 22, 0.78);
+  font-size: clamp(1.02rem, 1.35vw, 1.24rem);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.register-intro-imprint {
+  border-color: rgba(24, 24, 22, 0.16);
+}
+
+.register-search-panel {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 24px;
+  overflow: hidden;
+  padding: clamp(42px, 6vw, 72px);
+  color: #181816;
+}
+
+.register-search-heading {
+  display: grid;
+  gap: 16px;
+}
+
+.register-search-heading h2 {
+  font-size: clamp(3rem, 7vw, 5.8rem);
+}
+
+.register-search-form {
+  margin: 0;
+}
+
+.register-search-input-shell {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--liquid-glass-border);
+  border-radius: 999px;
+  background: var(--liquid-glass-bg);
+  color: #181816;
+  padding: 0 20px;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+}
+
+.register-search-input-shell svg {
+  flex: 0 0 auto;
+  color: rgba(24, 24, 22, 0.62);
+}
+
+.register-search-input-shell input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #181816;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  line-height: 1.2;
+}
+
+.register-search-input-shell input::placeholder {
+  color: rgba(24, 24, 22, 0.46);
+}
+
+.register-search-results {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  overflow: hidden;
+}
+
+.register-search-result-list {
+  display: grid;
+  min-height: 0;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+  padding-right: 4px;
+  scrollbar-width: none;
+}
+
+.register-search-result-list::-webkit-scrollbar {
+  display: none;
+}
+
+.register-search-result {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  width: 100%;
+  align-items: start;
+  border: 1px solid var(--liquid-glass-border);
+  border-radius: 18px;
+  background: var(--liquid-glass-bg);
+  color: #181816;
+  cursor: pointer;
+  padding: 14px;
+  text-align: left;
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-filter);
+  -webkit-backdrop-filter: var(--liquid-glass-filter);
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.register-search-result:hover,
+.register-search-result:focus-visible {
+  outline: none;
+  background: var(--liquid-glass-bg-active);
+  transform: translateY(-1px);
+}
+
+.register-search-result-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #181816;
+}
+
+.register-search-result-body {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.register-search-result-body strong {
+  color: #181816;
+  font-size: 1.1rem;
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.register-search-result-body span {
+  color: rgba(24, 24, 22, 0.76);
+  font-size: 0.96rem;
+  line-height: 1.4;
+}
+
+.register-search-result-body small {
+  color: rgba(24, 24, 22, 0.56);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.register-search-empty {
+  align-self: start;
+  margin: 0;
+  border-radius: 18px;
+  background: var(--liquid-glass-bg);
+  color: rgba(24, 24, 22, 0.68);
+  padding: 18px;
+  box-shadow: var(--liquid-glass-shadow);
+}
+
 .register-cover-page {
   position: relative;
   z-index: 1;
@@ -1281,8 +1806,14 @@ select {
   min-height: max(100%, var(--register-canvas-min-height, 900px));
   overflow: auto;
   background: var(--register-info);
-  color: #fffffa;
+  color: #181816;
   padding: clamp(52px, 7vw, 104px) clamp(28px, 7vw, 120px);
+}
+
+.register-info-page-panel {
+  min-height: auto;
+  background: transparent;
+  padding: clamp(48px, 6vw, 92px) clamp(28px, 6vw, 96px);
 }
 
 .register-info-content {
@@ -1300,12 +1831,12 @@ select {
 .register-info-heading svg {
   width: 28px;
   height: 28px;
-  color: rgba(255, 255, 250, 0.74);
+  color: rgba(24, 24, 22, 0.6);
   stroke-width: 1.8;
 }
 
 .register-info-heading span {
-  color: #fffffa;
+  color: #181816;
   font-size: clamp(3.4rem, 7vw, 7.5rem);
   font-weight: 650;
   letter-spacing: 0;
@@ -1314,7 +1845,7 @@ select {
 
 .register-info-heading p {
   max-width: 620px;
-  color: rgba(255, 255, 250, 0.78);
+  color: rgba(24, 24, 22, 0.76);
   font-size: clamp(1.02rem, 1.35vw, 1.26rem);
   font-weight: 400;
   line-height: 1.42;
@@ -1323,7 +1854,7 @@ select {
 .register-info-sections {
   display: grid;
   gap: 0;
-  border-top: 1px solid rgba(255, 255, 250, 0.58);
+  border-top: 1px solid rgba(24, 24, 22, 0.16);
 }
 
 .register-info-section {
@@ -1331,12 +1862,12 @@ select {
   align-content: start;
   grid-template-columns: minmax(160px, 0.35fr) minmax(0, 1fr);
   gap: clamp(20px, 3vw, 56px);
-  border-bottom: 1px solid rgba(255, 255, 250, 0.42);
+  border-bottom: 1px solid rgba(24, 24, 22, 0.12);
   padding: clamp(20px, 2.7vw, 34px) 0;
 }
 
 .register-info-section h2 {
-  color: #fffffa;
+  color: #181816;
   font-size: clamp(1rem, 1.25vw, 1.22rem);
   font-weight: 650;
   letter-spacing: 0;
@@ -1352,7 +1883,7 @@ select {
 
 .register-info-section li {
   max-width: 720px;
-  color: rgba(255, 255, 250, 0.8);
+  color: rgba(24, 24, 22, 0.74);
   font-size: clamp(0.95rem, 1.04vw, 1.08rem);
   font-weight: 400;
   line-height: 1.48;
@@ -1360,7 +1891,7 @@ select {
 
 .register-info-section li + li {
   padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 250, 0.18);
+  border-top: 1px solid rgba(24, 24, 22, 0.09);
 }
 
 .register-mobile-tabs {
@@ -1735,7 +2266,7 @@ select {
 }
 
 .recipe-detail-kicker {
-  color: #c5303e;
+  color: rgba(24, 24, 22, 0.56);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -1776,7 +2307,7 @@ select {
 }
 
 .recipe-author-box span {
-  color: #c5303e;
+  color: rgba(24, 24, 22, 0.56);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -2079,7 +2610,7 @@ select {
 }
 
 .artifact-lightbox-caption span {
-  color: #c5303e;
+  color: rgba(24, 24, 22, 0.56);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -2099,7 +2630,7 @@ select {
 }
 
 .artifact-lightbox-caption a {
-  color: #c5303e;
+  color: #181816;
   font-size: 0.9rem;
   font-weight: 760;
   text-decoration: underline;
@@ -2265,6 +2796,28 @@ select {
   text-underline-offset: 3px;
 }
 
+@keyframes floating-panel-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes floating-panel-morph-in {
+  from {
+    opacity: 0;
+    transform: translateY(64px) scale(0.18);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes unfold-detail {
   from {
     opacity: 0;
@@ -2289,6 +2842,39 @@ select {
     grid-template-rows: 59px minmax(0, 1fr);
     border: 0;
     border-radius: 0;
+  }
+
+  .register-launch-book {
+    --cover-spine-width: 0px;
+    --cover-corner-size: 0px;
+    width: 100vw;
+  }
+
+  .register-launch-spine {
+    display: none;
+  }
+
+  .register-launch-linen-corner,
+  .register-launch-front::after {
+    display: none;
+  }
+
+  .register-launch-front {
+    inset: 0;
+    padding: 0 16px 200px;
+  }
+
+  .register-launch-label {
+    width: min(80.3vw, 323px);
+    max-width: 323px;
+  }
+
+  .register-launch-cover-opening .register-launch-book {
+    transform: translate3d(-112vw, 0, 0) rotateY(-6deg) skewY(-1deg);
+  }
+
+  .register-launch-cover-opening .register-launch-front {
+    transform: rotateY(0deg) translate3d(0, 0, 0);
   }
 
   .register-left-rail {
@@ -2497,6 +3083,10 @@ select {
     line-height: 1.38;
   }
 
+  .register-floating-panel {
+    border-radius: 20px;
+  }
+
   .recipe-detail-grid,
   .artifact-detail {
     grid-template-columns: 1fr;
@@ -2519,6 +3109,75 @@ select {
 }
 
 @media (max-width: 700px) {
+  .register-floating-menu {
+    width: auto;
+    max-width: calc(100vw - 32px);
+    padding: 5px;
+  }
+
+  .register-floating-menu button {
+    min-height: 34px;
+    font-size: 0.85rem;
+    padding: 0 11px;
+  }
+
+  .register-floating-panel-backdrop {
+    align-items: end;
+    padding: 16px 12px max(16px, env(safe-area-inset-bottom));
+  }
+
+  .register-floating-panel {
+    width: 100%;
+    max-height: calc(100svh - 32px);
+    border-radius: 20px;
+  }
+
+  .register-floating-panel-search {
+    height: min(720px, calc(100svh - 32px));
+  }
+
+  .register-floating-panel-close {
+    top: 12px;
+    width: 34px;
+    height: 34px;
+    margin: 12px 12px 0 0;
+  }
+
+  .register-intro-panel {
+    gap: 34px;
+    padding: 54px 24px 32px;
+  }
+
+  .register-intro-panel h2 {
+    font-size: clamp(3rem, 14vw, 4.7rem);
+  }
+
+  .register-search-panel {
+    gap: 20px;
+    padding: 54px 20px 28px;
+  }
+
+  .register-search-heading h2 {
+    font-size: clamp(2.7rem, 13vw, 4.2rem);
+  }
+
+  .register-search-input-shell {
+    min-height: 52px;
+    padding: 0 16px;
+  }
+
+  .register-search-result {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 12px;
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  .register-search-result-icon {
+    width: 38px;
+    height: 38px;
+  }
+
   .recipe-register-paper {
     overflow-x: hidden;
     overflow-y: auto;
@@ -2598,6 +3257,11 @@ select {
   .register-info-page {
     min-height: max(100%, var(--register-canvas-min-height, 900px));
     padding: 42px 20px 64px;
+  }
+
+  .register-info-page-panel {
+    min-height: auto;
+    padding: 56px 22px 34px;
   }
 
   .register-info-content {

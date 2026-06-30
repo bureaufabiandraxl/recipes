@@ -9,14 +9,139 @@
     "image": "/images/directus/a223ed47-96b4-4626-87f3-5b848c1904b2.png"
   },
   {
-    "id": "jesus-karte",
+    "id": "becherkuchen-lara",
+    "registerLetter": "B",
+    "type": "fundstueck",
+    "title": "Becherkuchen Lara",
+    "description": "Becherkuchen Lara",
+    "caption": "Becherkuchen Lara",
+    "image": "/images/directus/ed90bb3e-d386-439c-9ddb-af79caa6baba.png"
+  },
+  {
+    "id": "dialektlexikon",
+    "registerLetter": "D",
+    "type": "fundstueck",
+    "title": "Dialektlexikon",
+    "description": "Dialektlexikon",
+    "caption": "Dialekte",
+    "image": "/images/directus/f2317774-1a23-4153-96da-f96a9449066c.png"
+  },
+  {
+    "id": "diverse-saucen",
+    "registerLetter": "D",
+    "type": "fundstueck",
+    "title": "Diverse Saucen",
+    "description": "Diverse Saucen",
+    "caption": "Diverse Saucen",
+    "image": "/images/directus/c2215789-994d-4bc2-93f3-64ea1f575a4d.png"
+  },
+  {
+    "id": "etiketten",
+    "registerLetter": "M",
+    "type": "fundstueck",
+    "title": "Etiketten",
+    "description": "Wofür die wohl in der Vergangenheit, gebraucht worden sind?",
+    "caption": "Etiketten",
+    "image": "/images/directus/bf8d4d6f-810a-49e0-86dd-e8ebb4812811.png"
+  },
+  {
+    "id": "etiketten-1",
     "registerLetter": "E",
-    "type": "bild",
-    "title": "Jesus Karte",
-    "description": "Auf der Rückseite stand: Immer schön fromm und fröhlich sein.",
-    "caption": "Ikonenbild, lose zwischen den E-Rezepten abgelegt.",
-    "captionLink": "https://commons.wikimedia.org/wiki/File:Spas_vsederzhitel_sinay.jpg",
-    "image": "/images/directus/eabb1a07-7e83-46ef-8c64-8274e244f5f4.png"
+    "type": "fundstueck",
+    "title": "Etiketten 1",
+    "description": "Etiketten 1",
+    "caption": "Etiketten 1",
+    "image": "/images/directus/30514367-ef60-44f5-81dc-3b0382aebfb3.png"
+  },
+  {
+    "id": "etiketten-2",
+    "registerLetter": "E",
+    "type": "fundstueck",
+    "title": "Etiketten 2",
+    "description": "Etiketten 2",
+    "caption": "Etiketten 2",
+    "image": "/images/directus/afe5d530-8abc-4d96-b57a-576a7846d86d.png"
+  },
+  {
+    "id": "geburtstage",
+    "registerLetter": "G",
+    "type": "fundstueck",
+    "title": "Geburtstage",
+    "description": "Geburtstage",
+    "caption": "Geburtstage",
+    "image": "/images/directus/22d7437d-e82c-4bab-af03-1c2d780de201.png"
+  },
+  {
+    "id": "gefuellter-lebkuchen",
+    "registerLetter": "G",
+    "type": "fundstueck",
+    "title": "Gefüllter Lebkuchen",
+    "description": "Gefüllter Lebkuchen",
+    "caption": "Gefüllter Lebkuchen",
+    "image": "/images/directus/a52b24b8-44dd-4732-b406-54476fb8b611.png"
+  },
+  {
+    "id": "gugelhupf-muffin",
+    "registerLetter": "G",
+    "type": "fundstueck",
+    "title": "Gugelhupf Muffin",
+    "description": "Gugelhupf Muffin",
+    "caption": "Gugelhupf Muffin",
+    "image": "/images/directus/475fb1f1-08ce-44f6-ac53-b8d33fa0c03e.png"
+  },
+  {
+    "id": "heringsalat",
+    "registerLetter": "H",
+    "type": "fundstueck",
+    "title": "Heringsalat",
+    "description": "Heringsalat",
+    "caption": "Heringsalat",
+    "image": "/images/directus/f753f801-af95-46dc-accf-abb06093d706.png"
+  },
+  {
+    "id": "jesus",
+    "registerLetter": "J",
+    "type": "fundstueck",
+    "title": "Jesus",
+    "description": "Jesus",
+    "caption": "Jesus",
+    "image": "/images/directus/46a927d3-a4cc-4bd4-8ad7-82e4ecc26146.png"
+  },
+  {
+    "id": "kranzkuchen-1",
+    "registerLetter": "K",
+    "type": "fundstueck",
+    "title": "Kranzkuchen 1",
+    "description": "Kranzkuchen 1",
+    "caption": "Kranzkuchen 1",
+    "image": "/images/directus/7fd96050-8026-493f-a64e-946e42cc2a22.png"
+  },
+  {
+    "id": "kranzkuchen-2",
+    "registerLetter": "K",
+    "type": "fundstueck",
+    "title": "Kranzkuchen 2",
+    "description": "Kranzkuchen 2",
+    "caption": "Kranzkuchen 2",
+    "image": "/images/directus/f383c9f5-c9bf-42eb-83ab-ea7963efb76f.png"
+  },
+  {
+    "id": "lebkuchen-neuner",
+    "registerLetter": "L",
+    "type": "fundstueck",
+    "title": "Lebkuchen Neuner",
+    "description": "Lebkuchen Neuner",
+    "caption": "Lebkuchen Neuner",
+    "image": "/images/directus/ca692fa0-1e2f-4dce-bc68-801317382e08.png"
+  },
+  {
+    "id": "lied-vom-frieden",
+    "registerLetter": "L",
+    "type": "fundstueck",
+    "title": "Lied vom Frieden",
+    "description": "Lied vom Frieden",
+    "caption": "Lied vom Frieden",
+    "image": "/images/directus/53092ea9-2b70-4160-bb90-cee2908c519b.png"
   },
   {
     "id": "marianne-portrait",
@@ -26,5 +151,131 @@
     "description": "Ein Foto von Marianne, lose im Register M abgelegt.",
     "caption": "Marianne - das Gesicht hinter dem Rezeptschatz.",
     "image": "/images/directus/ed0b2ed2-d45a-499d-b9a7-1d3dad9851c9.jpg"
+  },
+  {
+    "id": "marillenkuchen",
+    "registerLetter": "M",
+    "type": "fundstueck",
+    "title": "Marillenkuchen",
+    "description": "Marillenkuchen",
+    "caption": "Marillenkuchen",
+    "image": "/images/directus/f415c3cd-6088-4835-9123-59d3d9431ded.png"
+  },
+  {
+    "id": "melissen-saft",
+    "registerLetter": "M",
+    "type": "fundstueck",
+    "title": "Melissen-Saft",
+    "description": "Melissen-Saft",
+    "caption": "Melissen-Saft",
+    "image": "/images/directus/26c11a26-2725-41a0-bddb-97d76e69d3de.png"
+  },
+  {
+    "id": "milchverwertung-1",
+    "registerLetter": "M",
+    "type": "fundstueck",
+    "title": "Milchverwertung 1",
+    "description": "Milchverwertung 1",
+    "caption": "Milchverwertung 1",
+    "image": "/images/directus/4731f3ab-05a0-4ee1-ba63-0ae30da3a076.png"
+  },
+  {
+    "id": "milchverwertung-2",
+    "registerLetter": "M",
+    "type": "fundstueck",
+    "title": "Milchverwertung 2",
+    "description": "Milchverwertung 2",
+    "caption": "Milchverwertung 2",
+    "image": "/images/directus/47743c57-17f6-4b39-9611-956d89a4c9b7.png"
+  },
+  {
+    "id": "muffins-1",
+    "registerLetter": "M",
+    "type": "fundstueck",
+    "title": "Muffins 1",
+    "description": "Muffins 1",
+    "caption": "Muffins 1",
+    "image": "/images/directus/9f48e1f8-2ae6-407d-a1bf-0b45f629b6bc.png"
+  },
+  {
+    "id": "muffins-2",
+    "registerLetter": "M",
+    "type": "fundstueck",
+    "title": "Muffins 2",
+    "description": "Muffins 2",
+    "caption": "Muffins 2",
+    "image": "/images/directus/8b8fc18d-11a2-4f4e-bcf6-873e288771c5.png"
+  },
+  {
+    "id": "rabarber-traum",
+    "registerLetter": "R",
+    "type": "fundstueck",
+    "title": "Rhabarber-Traum",
+    "description": "Rhabarber-Traum",
+    "caption": "Rhabarber-Traum",
+    "image": "/images/directus/dc9d10e7-90e0-47fa-b520-3b7fd471d443.png"
+  },
+  {
+    "id": "stangenbrote",
+    "registerLetter": "S",
+    "type": "fundstueck",
+    "title": "Stangenbrote",
+    "description": "Stangenbrote",
+    "caption": "Stangenbrote",
+    "image": "/images/directus/5c794a8f-c831-4e42-af1c-fe4f6fd488d4.png"
+  },
+  {
+    "id": "teig-rezepte-fundstueck",
+    "registerLetter": "T",
+    "type": "fundstueck",
+    "title": "Teig-Rezepte",
+    "description": "Teig-Rezepte",
+    "caption": "Teig-Rezepte",
+    "image": "/images/directus/f9600a8b-2782-49cf-af15-f1f07039a326.png"
+  },
+  {
+    "id": "voegel",
+    "registerLetter": "V",
+    "type": "fundstueck",
+    "title": "Vögel",
+    "description": "Vögel",
+    "caption": "Vögel",
+    "image": "/images/directus/b89c3b40-18d3-42b1-85ab-1135cc063320.png"
+  },
+  {
+    "id": "wapu-koechin",
+    "registerLetter": "W",
+    "type": "fundstueck",
+    "title": "WAPU Köchin",
+    "description": "WAPU Köchin",
+    "caption": "WAPU Köchin",
+    "image": "/images/directus/fd9c5c60-028c-4cef-b187-3b6672de0b80.png"
+  },
+  {
+    "id": "zeit-schenken",
+    "registerLetter": "Z",
+    "type": "fundstueck",
+    "title": "Zeit schenken",
+    "description": "Zeit schenken",
+    "caption": "Zeit schenken",
+    "image": "/images/directus/6599b45e-7755-4f82-805f-a513936e718d.png"
+  },
+  {
+    "id": "zitate",
+    "registerLetter": "Z",
+    "type": "fundstueck",
+    "title": "Zitate",
+    "description": "Zitate",
+    "caption": "Zitate",
+    "image": "/images/directus/d02b0ee8-bb42-41fe-af22-13bcd9f8d43c.png"
+  },
+  {
+    "id": "zukkinistrudel-mit-knoblauchsosse",
+    "registerLetter": "Z",
+    "type": "fundstueck",
+    "title": "Zukkinistrudel mit Knoblauchsoße",
+    "description": "Zukkinistrudel mit Knoblauchsoße",
+    "caption": "Zukkinistrudel mit Knoblauchsoße",
+    "image": "/images/directus/682b2b06-1375-4afd-89a6-9e67e6d61c5c.png"
   }
 ]

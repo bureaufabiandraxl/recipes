@@ -2,21 +2,24 @@
 
 import Image from "next/image";
 import {
+  BookOpen,
   ChefHat,
   CircleUser,
   Clock3,
   Cookie,
   ImageIcon,
-  Info,
   Martini,
   Minimize2,
   Minus,
+  PackageSearch,
   Plus,
   ReceiptText,
+  Search,
+  StickyNote,
   X,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createElement, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import { collectedBookItems } from "@/data/recipes";
@@ -57,6 +60,17 @@ type BoardItem =
     }
   | {
       id: string;
+      kind: "recipe-card";
+      registerLetter: string;
+      title: string;
+      color: string;
+      rotation: number;
+      image: string;
+      recipe: Recipe;
+      position: BoardPosition;
+    }
+  | {
+      id: string;
       kind: "artifact";
       registerLetter: string;
       title: string;
@@ -69,6 +83,19 @@ type BoardItem =
       artifactType: "notiz" | "bild" | "fundstueck";
       position: BoardPosition;
     };
+
+interface SearchableRegisterItem {
+  id: string;
+  itemId: string;
+  href: string;
+  title: string;
+  description: string;
+  registerLetter: string;
+  typeLabel: string;
+  icon: LucideIcon;
+  metaParts: string[];
+  searchText: string;
+}
 
 interface DragState {
   id: string;
@@ -86,16 +113,17 @@ interface ZoomPoint {
 }
 
 type RegisterEntry =
-  | { id: "intro"; label: ""; type: "intro" }
-  | { id: string; label: string; type: "letter" }
-  | { id: "info"; label: ""; type: "info" };
+  { id: string; label: string; type: "letter" };
 
 interface RegisterRouteState {
   activeLetter: string;
   selectedItemId: string | null;
 }
 
+type FloatingPanelType = "intro" | "search";
+
 const cardColors = ["#fec8ff", "#deffc8", "#fff36e", "#e3fdff", "#ffb5e5", "#ff9e66"];
+const recipeCardOnlyColor = "#d9e7ff";
 const syncedCollectedBookItems = generatedArtifacts as CollectedBookItem[];
 const recipeColorOverrides: Record<string, string> = {
   kirchtagskrapfen: "#fff36e",
@@ -143,9 +171,7 @@ const designRegisterLetters = [
   "Z",
 ];
 const registerEntries: RegisterEntry[] = [
-  { id: "intro", label: "", type: "intro" },
   ...designRegisterLetters.map((letter) => ({ id: letter, label: letter, type: "letter" }) as RegisterEntry),
-  { id: "info", label: "", type: "info" },
 ];
 const liquidGlassRuntimeStyleId = "marianne-liquid-glass-backdrop-filter";
 const liquidGlassRuntimeSelectors = [
@@ -167,7 +193,18 @@ const liquidGlassRuntimeSelectors = [
   ".artifact-view-chip",
   ".artifact-view-close",
   ".artifact-view-caption",
+  ".register-floating-menu",
+  ".register-floating-menu button",
+  ".register-floating-panel",
+  ".register-floating-panel-close",
+  ".register-search-input-shell",
+  ".register-search-result",
 ].join(",\n");
+const introParagraphs = [
+  "Mariannes Rezeptschatz ist ein digitales Registerbuch aus handschriftlichen Rezeptkarten, losen Fundstücken und kleinen Erinnerungen aus Omas Küche.",
+  "Die Originale bleiben sichtbar: als Scans, Fotos und Artefakte, die auf den linierten Seiten liegen und sich entdecken lassen. Daneben gibt es lesbare Rezeptfassungen, Tipps und Hinweise zu Gastautorinnen.",
+  "Das Projekt ist bewusst wie ein altes Registerbuch aufgebaut. Du kannst nach Buchstaben blättern, Karten verschieben, Details öffnen und die Originale vergrößern.",
+];
 const imprintSections = [
   {
     title: "Medieninhaber und Kontakt",
@@ -270,12 +307,126 @@ function getRecipeIcon(recipe: Recipe): LucideIcon {
   if (iconName && iconName in LucideIcons) {
     const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
 
-    if (typeof Icon === "function") {
+    if (Icon) {
       return Icon as LucideIcon;
     }
   }
 
   return recipe.slug === "eierlikoer" ? Martini : Cookie;
+}
+
+function getRecipeEntryTypeLabel(recipe: Recipe) {
+  switch (recipe.entryType) {
+    case "rezeptkarte":
+      return "Originalkarte";
+    case "notiz":
+      return "Notiz";
+    case "bild":
+      return "Bild";
+    case "fundstueck":
+      return "Fundstück";
+    case "rezept":
+    default:
+      return "Rezept";
+  }
+}
+
+function getArtifactTypeLabel(type: CollectedBookItem["type"]) {
+  switch (type) {
+    case "notiz":
+      return "Notiz";
+    case "bild":
+      return "Bild";
+    case "fundstueck":
+    default:
+      return "Fundstück";
+  }
+}
+
+function getRecipeEntryTypeIcon(recipe: Recipe): LucideIcon {
+  switch (recipe.entryType) {
+    case "rezeptkarte":
+      return ReceiptText;
+    case "notiz":
+      return StickyNote;
+    case "bild":
+      return ImageIcon;
+    case "fundstueck":
+      return PackageSearch;
+    case "rezept":
+    default:
+      return ChefHat;
+  }
+}
+
+function getArtifactTypeIcon(type: CollectedBookItem["type"]): LucideIcon {
+  switch (type) {
+    case "notiz":
+      return StickyNote;
+    case "bild":
+      return ImageIcon;
+    case "fundstueck":
+    default:
+      return PackageSearch;
+  }
+}
+
+function getBoardItemTypeIcon(item: BoardItem): LucideIcon {
+  if (item.kind === "artifact") {
+    return getArtifactTypeIcon(item.artifactType);
+  }
+
+  return getRecipeEntryTypeIcon(item.recipe);
+}
+
+function normalizeSearchText(value: string) {
+  return value
+    .toLocaleLowerCase("de-AT")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function getRecipeSearchText(recipe: Recipe) {
+  return normalizeSearchText(
+    [
+      recipe.title,
+      getRecipeEntryTypeLabel(recipe),
+      recipe.entryType,
+      recipe.shortDescription,
+      recipe.story,
+      recipe.author,
+      recipe.category,
+      ...recipe.categories,
+      ...recipe.tags,
+      ...recipe.ingredients.flatMap((ingredient) => [ingredient.name, ingredient.unit, ingredient.note ?? ""]),
+      ...recipe.steps.map((step) => step.instruction),
+      ...recipe.tips,
+      ...recipe.notesFromOriginal,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+}
+
+function getArtifactSearchText(item: CollectedBookItem) {
+  return normalizeSearchText(
+    [item.title, getArtifactTypeLabel(item.type), item.type, item.description, item.caption ?? "", item.registerLetter]
+      .filter(Boolean)
+      .join(" "),
+  );
+}
+
+function getIngredientMatches(recipe: Recipe, normalizedQuery: string) {
+  if (!normalizedQuery) {
+    return recipe.ingredients.slice(0, 4).map((ingredient) => ingredient.name);
+  }
+
+  return recipe.ingredients
+    .filter((ingredient) =>
+      normalizeSearchText([ingredient.name, ingredient.unit, ingredient.note ?? ""].join(" ")).includes(normalizedQuery),
+    )
+    .slice(0, 4)
+    .map((ingredient) => ingredient.name);
 }
 
 function getDifficultyLabel(recipe: Recipe) {
@@ -325,14 +476,6 @@ function getLettersWithEntries(recipes: Recipe[]) {
 }
 
 function getRegisterHash(letter: string) {
-  if (letter === "intro") {
-    return "#/intro";
-  }
-
-  if (letter === "info") {
-    return "#/info";
-  }
-
   return `#/register/${encodeURIComponent(letter)}`;
 }
 
@@ -343,12 +486,62 @@ function getItemHash(item: BoardItem) {
     return `${registerHash}/recipe/${encodeURIComponent(item.recipe.slug)}`;
   }
 
+  if (item.kind === "recipe-card") {
+    return `${registerHash}/card/${encodeURIComponent(item.recipe.slug)}`;
+  }
+
   return `${registerHash}/artifact/${encodeURIComponent(item.id.replace(/^artifact-/, ""))}`;
 }
 
-function parseRegisterHash(hash: string): RegisterRouteState {
+function createSearchableRegisterItems(recipes: Recipe[], normalizedQuery: string): SearchableRegisterItem[] {
+  const recipeItems = recipes.map<SearchableRegisterItem>((recipe) => {
+    const isRecipeCardOnly = recipe.entryType === "rezeptkarte";
+    const typeLabel = getRecipeEntryTypeLabel(recipe);
+    const ingredientMatches = getIngredientMatches(recipe, normalizedQuery);
+    const categoryLabel = recipe.entryType === "rezept" ? getRecipeCategoryLabel(recipe) : recipe.category;
+    const metaParts = [typeLabel, categoryLabel, `${recipe.registerLetter}-Register`, ...ingredientMatches].filter(
+      Boolean,
+    ) as string[];
+
+    return {
+      id: `${isRecipeCardOnly ? "recipe-card" : "recipe"}-${recipe.slug}`,
+      itemId: `${isRecipeCardOnly ? "recipe-card" : "recipe"}-${recipe.slug}`,
+      href: `${getRegisterHash(recipe.registerLetter)}/${isRecipeCardOnly ? "card" : "recipe"}/${encodeURIComponent(recipe.slug)}`,
+      title: recipe.title,
+      description: recipe.shortDescription || recipe.story || typeLabel,
+      registerLetter: recipe.registerLetter,
+      typeLabel,
+      icon: getRecipeEntryTypeIcon(recipe),
+      metaParts,
+      searchText: getRecipeSearchText(recipe),
+    };
+  });
+
+  const artifactItems = (syncedCollectedBookItems.length ? syncedCollectedBookItems : collectedBookItems).map<
+    SearchableRegisterItem
+  >((item) => {
+    const typeLabel = getArtifactTypeLabel(item.type);
+
+    return {
+      id: `artifact-${item.id}`,
+      itemId: `artifact-${item.id}`,
+      href: `${getRegisterHash(item.registerLetter)}/artifact/${encodeURIComponent(item.id)}`,
+      title: item.title,
+      description: item.description || item.caption || typeLabel,
+      registerLetter: item.registerLetter,
+      typeLabel,
+      icon: getArtifactTypeIcon(item.type),
+      metaParts: [typeLabel, `${item.registerLetter}-Register`, item.caption ?? ""].filter(Boolean),
+      searchText: getArtifactSearchText(item),
+    };
+  });
+
+  return [...recipeItems, ...artifactItems].sort((itemA, itemB) => itemA.title.localeCompare(itemB.title, "de-AT"));
+}
+
+function parseRegisterHash(hash: string, fallbackLetter: string): RegisterRouteState {
   const fallbackRoute: RegisterRouteState = {
-    activeLetter: "intro",
+    activeLetter: fallbackLetter,
     selectedItemId: null,
   };
   const segments = hash
@@ -359,14 +552,6 @@ function parseRegisterHash(hash: string): RegisterRouteState {
 
   if (segments.length === 0) {
     return fallbackRoute;
-  }
-
-  if (segments[0] === "intro") {
-    return { activeLetter: "intro", selectedItemId: null };
-  }
-
-  if (segments[0] === "info") {
-    return { activeLetter: "info", selectedItemId: null };
   }
 
   if (segments[0] !== "register" || !segments[1]) {
@@ -381,6 +566,13 @@ function parseRegisterHash(hash: string): RegisterRouteState {
     return {
       activeLetter,
       selectedItemId: `recipe-${itemSlug}`,
+    };
+  }
+
+  if (itemType === "card" && itemSlug) {
+    return {
+      activeLetter,
+      selectedItemId: `recipe-card-${itemSlug}`,
     };
   }
 
@@ -406,10 +598,6 @@ function pushRegisterHash(hash: string) {
 }
 
 function registerEntryHasContent(entry: RegisterEntry, lettersWithEntries: Set<string>) {
-  if (entry.type !== "letter") {
-    return true;
-  }
-
   if (lettersWithEntries.has(entry.id)) {
     return true;
   }
@@ -442,15 +630,16 @@ function getRandomizedBoardItem(item: BoardItem, seed: string, index: number): B
     return item;
   }
 
-  const xOffset = (getSeededRandom(seed, `${item.id}:x`) - 0.5) * (item.kind === "recipe" ? 12 : 16);
-  const yOffset = (getSeededRandom(seed, `${item.id}:y`) - 0.5) * (item.kind === "recipe" ? 18 : 24);
-  const rotationOffset = (getSeededRandom(seed, `${item.id}:rotation`) - 0.5) * (item.kind === "recipe" ? 3 : 5);
+  const isRecipeLike = item.kind === "recipe" || item.kind === "recipe-card";
+  const xOffset = (getSeededRandom(seed, `${item.id}:x`) - 0.5) * (isRecipeLike ? 12 : 16);
+  const yOffset = (getSeededRandom(seed, `${item.id}:y`) - 0.5) * (isRecipeLike ? 18 : 24);
+  const rotationOffset = (getSeededRandom(seed, `${item.id}:rotation`) - 0.5) * (isRecipeLike ? 3 : 5);
 
   return {
     ...item,
     rotation: item.rotation + rotationOffset,
     position: {
-      x: clamp(item.position.x + xOffset, 3, item.kind === "recipe" ? 62 : 78),
+      x: clamp(item.position.x + xOffset, 3, isRecipeLike ? 62 : 78),
       y: clamp(item.position.y + yOffset + index * 0.6, 0, 160),
     },
   };
@@ -470,20 +659,26 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
     });
 
   const recipeItems = recipesForLetter
-    .map<BoardItem>((recipe, index) => ({
-      id: `recipe-${recipe.slug}`,
-      kind: "recipe",
-      registerLetter: recipe.registerLetter,
-      title: recipe.title,
-      color: recipe.cardColor ?? recipeColorOverrides[recipe.slug] ?? cardColors[index % cardColors.length],
-      rotation: 0,
-      image: recipe.originalCardImage,
-      recipe,
-      position: defaultPositions[index] ?? {
-        x: 8 + (index % 3) * 24,
-        y: 14 + Math.floor(index / 3) * 24,
-      },
-    }));
+    .map<BoardItem>((recipe, index) => {
+      const isRecipeCardOnly = recipe.entryType === "rezeptkarte";
+
+      return {
+        id: `${isRecipeCardOnly ? "recipe-card" : "recipe"}-${recipe.slug}`,
+        kind: isRecipeCardOnly ? "recipe-card" : "recipe",
+        registerLetter: recipe.registerLetter,
+        title: recipe.title,
+        color: isRecipeCardOnly
+          ? recipeCardOnlyColor
+          : recipe.cardColor ?? recipeColorOverrides[recipe.slug] ?? cardColors[index % cardColors.length],
+        rotation: 0,
+        image: recipe.originalCardImage,
+        recipe,
+        position: defaultPositions[index] ?? {
+          x: 8 + (index % 3) * 24,
+          y: 14 + Math.floor(index / 3) * 24,
+        },
+      };
+    });
 
   const artifactItems = syncedCollectedBookItems.length ? syncedCollectedBookItems : collectedBookItems;
   const collectedArtifactItems = artifactItems
@@ -550,7 +745,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
 }
 
 function getEstimatedItemHeight(item: BoardItem) {
-  if (item.kind === "recipe") {
+  if (item.kind === "recipe" || item.kind === "recipe-card") {
     return 430;
   }
 
@@ -628,33 +823,246 @@ function RegisterMobileTabShape({ isWide = false }: { isWide?: boolean }) {
   );
 }
 
-function InfoRegisterPage() {
-  return (
-    <section className="register-info-page" aria-label="Info und Impressum">
-      <div className="register-info-content">
-        <div className="register-info-heading">
-          <Info aria-hidden="true" size={24} strokeWidth={2} />
-          <span>Info & Impressum</span>
-          <p>
-            Rechtliche Angaben, Quellenhinweise und Verantwortlichkeiten zu Mariannes digitalem
-            Rezeptschatz.
-          </p>
-        </div>
+function RegisterCover({
+  isOpening,
+  onOpen,
+}: {
+  isOpening: boolean;
+  onOpen: () => void;
+}) {
+  const dragStartRef = useRef<ZoomPoint | null>(null);
 
-        <div className="register-info-sections">
-          {imprintSections.map((section) => (
-            <section className="register-info-section" key={section.title}>
-              <h2>{section.title}</h2>
-              <ul>
-                {section.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
+  function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
+    dragStartRef.current = { x: event.clientX, y: event.clientY };
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLButtonElement>) {
+    if (!dragStartRef.current || isOpening) {
+      return;
+    }
+
+    const dragDistance = Math.hypot(
+      event.clientX - dragStartRef.current.x,
+      event.clientY - dragStartRef.current.y,
+    );
+
+    if (dragDistance > 10) {
+      dragStartRef.current = null;
+      onOpen();
+    }
+  }
+
+  function handlePointerUp() {
+    dragStartRef.current = null;
+  }
+
+  return (
+    <div
+      className={["register-launch-cover", isOpening ? "register-launch-cover-opening" : ""]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <button
+        aria-label="Registerbuch öffnen"
+        className="register-launch-cover-button"
+        disabled={isOpening}
+        onClick={onOpen}
+        onPointerCancel={handlePointerUp}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        type="button"
+      >
+        <span className="register-launch-book">
+          <span className="register-launch-spine" aria-hidden="true" />
+          <span className="register-launch-front">
+            <span className="register-launch-linen-corner register-launch-linen-corner-top" aria-hidden="true" />
+            <span className="register-launch-linen-corner register-launch-linen-corner-bottom" aria-hidden="true" />
+            <Image
+              alt="Register-Buch, Mariannes Rezeptschatz"
+              className="register-launch-label"
+              draggable={false}
+              height={1395}
+              priority
+              src="/images/brand/register-book-label.png"
+              width={2222}
+            />
+          </span>
+        </span>
+      </button>
+    </div>
+  );
+}
+
+function RegisterFloatingMenu({
+  onIntro,
+  onSearch,
+}: {
+  onIntro: () => void;
+  onSearch: () => void;
+}) {
+  return (
+    <nav className="register-floating-menu" aria-label="Projektmenü">
+      <button aria-label="Intro und Impressum öffnen" onClick={onIntro} type="button">
+        <BookOpen aria-hidden="true" size={17} strokeWidth={1.9} />
+        Intro
+      </button>
+      <button aria-label="Suche öffnen" onClick={onSearch} type="button">
+        <Search aria-hidden="true" size={17} strokeWidth={1.9} />
+        Suche
+      </button>
+    </nav>
+  );
+}
+
+function RegisterIntroPanel() {
+  return (
+    <section className="register-intro-panel" aria-label="Intro und Impressum">
+      <div className="register-intro-hero">
+        <span>Intro & Impressum</span>
+        <h2>Mariannes Rezeptschatz</h2>
+        <div className="register-intro-copy">
+          {introParagraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
       </div>
+
+      <div className="register-info-sections register-intro-imprint">
+        {imprintSections.map((section) => (
+          <section className="register-info-section" key={section.title}>
+            <h2>{section.title}</h2>
+            <ul>
+              {section.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
     </section>
+  );
+}
+
+function RegisterSearchPanel({
+  onQueryChange,
+  onSelectItem,
+  query,
+  recipes,
+}: {
+  onQueryChange: (query: string) => void;
+  onSelectItem: (item: SearchableRegisterItem) => void;
+  query: string;
+  recipes: Recipe[];
+}) {
+  const normalizedQuery = normalizeSearchText(query.trim());
+  const searchResults = useMemo(() => {
+    const searchableItems = createSearchableRegisterItems(recipes, normalizedQuery);
+
+    if (!normalizedQuery) {
+      return searchableItems;
+    }
+
+    return searchableItems.filter((item) => item.searchText.includes(normalizedQuery));
+  }, [normalizedQuery, recipes]);
+
+  return (
+    <section className="register-search-panel" aria-label="Suche">
+      <div className="register-search-heading">
+        <span>Suche</span>
+        <h2>Einträge finden</h2>
+      </div>
+
+      <form className="register-search-form" onSubmit={(event) => event.preventDefault()} role="search">
+        <label className="register-search-input-shell">
+          <Search aria-hidden="true" size={20} strokeWidth={1.9} />
+          <input
+            autoFocus
+            aria-label="Nach Zutaten oder Gerichten suchen"
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder="Zutat, Gericht oder Fundstück"
+            type="search"
+            value={query}
+          />
+        </label>
+      </form>
+
+      <div className="register-search-results" aria-live="polite">
+        <span className="register-search-count">
+          {searchResults.length === 1 ? "1 Treffer" : `${searchResults.length} Treffer`}
+        </span>
+
+        {searchResults.length ? (
+          <div className="register-search-result-list">
+            {searchResults.map((item) => {
+              return (
+                <button
+                  className="register-search-result"
+                  key={item.id}
+                  onClick={() => onSelectItem(item)}
+                  type="button"
+                >
+                  <span className="register-search-result-icon">
+                    {createElement(item.icon, { "aria-hidden": "true", size: 20, strokeWidth: 1.9 })}
+                  </span>
+                  <span className="register-search-result-body">
+                    <strong>{item.title}</strong>
+                    <span>{item.description}</span>
+                    <small>{item.metaParts.join(" · ")}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="register-search-empty">Keine passenden Einträge gefunden.</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function RegisterFloatingPanel({
+  onClose,
+  onQueryChange,
+  onSelectItem,
+  query,
+  recipes,
+  type,
+}: {
+  onClose: () => void;
+  onQueryChange: (query: string) => void;
+  onSelectItem: (item: SearchableRegisterItem) => void;
+  query: string;
+  recipes: Recipe[];
+  type: FloatingPanelType;
+}) {
+  return (
+    <div className="register-floating-panel-backdrop" onClick={onClose} role="presentation">
+      <article
+        className={["register-floating-panel", `register-floating-panel-${type}`].join(" ")}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          aria-label="Fenster schließen"
+          className="register-floating-panel-close"
+          onClick={onClose}
+          type="button"
+        >
+          <X aria-hidden="true" size={18} strokeWidth={2.1} />
+        </button>
+        {type === "intro" ? (
+          <RegisterIntroPanel />
+        ) : (
+          <RegisterSearchPanel
+            onQueryChange={onQueryChange}
+            onSelectItem={onSelectItem}
+            query={query}
+            recipes={recipes}
+          />
+        )}
+      </article>
+    </div>
   );
 }
 
@@ -698,7 +1106,15 @@ function ZoomableImage({
   }
 
   useEffect(() => {
-    resetZoom();
+    const timeout = window.setTimeout(() => {
+      pointersRef.current.clear();
+      lastDragPointRef.current = null;
+      lastPinchDistanceRef.current = null;
+      lastPinchCenterRef.current = null;
+      setTransform({ scale: 1, x: 0, y: 0 });
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [src]);
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
@@ -830,12 +1246,15 @@ function ZoomableImage({
 
 export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
   const lettersWithEntries = useMemo(() => getLettersWithEntries(recipes), [recipes]);
-  const firstLetter = "intro";
   const firstAvailableRegisterLetter =
     registerEntries.find((entry) => entry.type === "letter" && registerEntryHasContent(entry, lettersWithEntries))?.id ??
-    "info";
-  const [activeLetter, setActiveLetter] = useState<string>(firstLetter);
+    "E";
+  const [activeLetter, setActiveLetter] = useState<string>(firstAvailableRegisterLetter);
   const [layoutSeed, setLayoutSeed] = useState("");
+  const [isCoverVisible, setIsCoverVisible] = useState(true);
+  const [isCoverOpening, setIsCoverOpening] = useState(false);
+  const [floatingPanel, setFloatingPanel] = useState<FloatingPanelType | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [positions, setPositions] = useState<Record<string, BoardPosition>>({});
   const [zIndexes, setZIndexes] = useState<Record<string, number>>({});
   const [selectedItem, setSelectedItem] = useState<BoardItem | null>(null);
@@ -845,9 +1264,22 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
   const dragRef = useRef<DragState | null>(null);
   const zIndexCounterRef = useRef(1);
   const lastInteractionMovedRef = useRef(false);
+  const coverOpenTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setLayoutSeed(`${Date.now()}-${Math.random()}`);
+    const timeout = window.setTimeout(() => {
+      setLayoutSeed(`${Date.now()}-${Math.random()}`);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (coverOpenTimeoutRef.current) {
+        window.clearTimeout(coverOpenTimeoutRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -873,27 +1305,73 @@ ${liquidGlassRuntimeSelectors} {
 
   useEffect(() => {
     function applyRouteFromHash() {
-      const route = parseRegisterHash(window.location.hash);
+      const hash = window.location.hash;
+      const routeKey = hash.replace(/^#\/?/, "").split("/").filter(Boolean)[0];
+
+      if (!hash || hash === "#" || hash === "#/") {
+        setActiveLetter(firstAvailableRegisterLetter);
+        setIsCoverVisible(true);
+        setIsCoverOpening(false);
+        setFloatingPanel(null);
+        setSelectedItem(null);
+        setSelectedItemIdFromRoute(null);
+        return;
+      }
+
+      if (routeKey === "intro") {
+        setActiveLetter(firstAvailableRegisterLetter);
+        setIsCoverVisible(false);
+        setIsCoverOpening(false);
+        setFloatingPanel("intro");
+        setSelectedItem(null);
+        setSelectedItemIdFromRoute(null);
+        return;
+      }
+
+      if (routeKey === "info") {
+        replaceRegisterHash("#/intro");
+        setActiveLetter(firstAvailableRegisterLetter);
+        setIsCoverVisible(false);
+        setIsCoverOpening(false);
+        setFloatingPanel("intro");
+        setSelectedItem(null);
+        setSelectedItemIdFromRoute(null);
+        return;
+      }
+
+      if (routeKey === "search") {
+        setActiveLetter(firstAvailableRegisterLetter);
+        setIsCoverVisible(false);
+        setIsCoverOpening(false);
+        setFloatingPanel("search");
+        setSelectedItem(null);
+        setSelectedItemIdFromRoute(null);
+        return;
+      }
+
+      const route = parseRegisterHash(hash, firstAvailableRegisterLetter);
       const nextEntry = registerEntries.find((entry) => entry.id === route.activeLetter);
 
       if (!nextEntry || !registerEntryHasContent(nextEntry, lettersWithEntries)) {
-        replaceRegisterHash(getRegisterHash(firstLetter));
-        setActiveLetter(firstLetter);
+        replaceRegisterHash(getRegisterHash(firstAvailableRegisterLetter));
+        setActiveLetter(firstAvailableRegisterLetter);
+        setIsCoverVisible(false);
+        setIsCoverOpening(false);
+        setFloatingPanel(null);
         setSelectedItem(null);
         setSelectedItemIdFromRoute(null);
         return;
       }
 
       setActiveLetter(route.activeLetter);
+      setIsCoverVisible(false);
+      setIsCoverOpening(false);
+      setFloatingPanel(null);
       setSelectedItemIdFromRoute(route.selectedItemId);
 
       if (!route.selectedItemId) {
         setSelectedItem(null);
       }
-    }
-
-    if (!window.location.hash) {
-      replaceRegisterHash(getRegisterHash(firstLetter));
     }
 
     applyRouteFromHash();
@@ -904,7 +1382,7 @@ ${liquidGlassRuntimeSelectors} {
       window.removeEventListener("hashchange", applyRouteFromHash);
       window.removeEventListener("popstate", applyRouteFromHash);
     };
-  }, [firstLetter, lettersWithEntries]);
+  }, [firstAvailableRegisterLetter, lettersWithEntries]);
 
   const boardItems = useMemo(
     () => createBoardItems(recipes, activeLetter, layoutSeed),
@@ -916,33 +1394,21 @@ ${liquidGlassRuntimeSelectors} {
       return;
     }
 
-    const routedItem = boardItems.find((item) => item.id === selectedItemIdFromRoute);
+    const timeout = window.setTimeout(() => {
+      const routedItem = boardItems.find((item) => item.id === selectedItemIdFromRoute);
+      setSelectedItem(routedItem ?? null);
+    }, 0);
 
-    if (routedItem) {
-      setSelectedItem(routedItem);
-    } else {
-      setSelectedItem(null);
-    }
+    return () => window.clearTimeout(timeout);
   }, [boardItems, selectedItemIdFromRoute]);
-  const activeRegisterEntry = registerEntries.find((entry) => entry.id === activeLetter);
-  const isSpecialRegisterPage = activeRegisterEntry?.type === "intro" || activeRegisterEntry?.type === "info";
-  const activeRegisterBackground =
-    activeRegisterEntry?.type === "intro"
-      ? "#232319"
-      : activeRegisterEntry?.type === "info"
-        ? "#ef4044"
-        : "#fffffa";
+  const activeRegisterBackground = "#fffffa";
   const activeOverscrollBackground =
-    selectedItem?.kind === "recipe"
+    selectedItem?.kind === "recipe" || selectedItem?.kind === "recipe-card"
       ? selectedItem.color
       : selectedItem?.kind === "artifact"
         ? "#f5f4f0"
         : activeRegisterBackground;
   const canvasMinHeight = useMemo(() => {
-    if (isSpecialRegisterPage) {
-      return registerPageBaseHeight;
-    }
-
     if (boardItems.length === 0) {
       return 1117;
     }
@@ -955,7 +1421,7 @@ ${liquidGlassRuntimeSelectors} {
     const densityHeight = registerPageBaseHeight + Math.max(0, Math.ceil(boardItems.length / 2) - 2) * 260;
 
     return getRegisterPageHeight(Math.max(registerPageBaseHeight, defaultLayoutHeight, densityHeight));
-  }, [boardItems, isSpecialRegisterPage]);
+  }, [boardItems]);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--rezeptschatz-overscroll-bg", activeOverscrollBackground);
@@ -988,6 +1454,9 @@ ${liquidGlassRuntimeSelectors} {
       return;
     }
 
+    setIsCoverVisible(false);
+    setIsCoverOpening(false);
+    setFloatingPanel(null);
     pushRegisterHash(getRegisterHash(letter));
     setActiveLetter(letter);
     setSelectedItem(null);
@@ -995,7 +1464,44 @@ ${liquidGlassRuntimeSelectors} {
   }
 
   function handleCoverOpen() {
-    handleLetterChange(firstAvailableRegisterLetter);
+    if (isCoverOpening) {
+      return;
+    }
+
+    setIsCoverOpening(true);
+    coverOpenTimeoutRef.current = window.setTimeout(() => {
+      setIsCoverVisible(false);
+      setIsCoverOpening(false);
+      setFloatingPanel(null);
+      setActiveLetter(firstAvailableRegisterLetter);
+      setSelectedItem(null);
+      setSelectedItemIdFromRoute(null);
+      pushRegisterHash(getRegisterHash(firstAvailableRegisterLetter));
+    }, 980);
+  }
+
+  function openFloatingPanel(type: FloatingPanelType) {
+    setIsCoverVisible(false);
+    setIsCoverOpening(false);
+    setSelectedItem(null);
+    setSelectedItemIdFromRoute(null);
+    setFloatingPanel(type);
+    pushRegisterHash(type === "intro" ? "#/intro" : "#/search");
+  }
+
+  function closeFloatingPanel() {
+    setFloatingPanel(null);
+    pushRegisterHash(getRegisterHash(activeLetter));
+  }
+
+  function openItemFromSearch(item: SearchableRegisterItem) {
+    setIsCoverVisible(false);
+    setIsCoverOpening(false);
+    setFloatingPanel(null);
+    setActiveLetter(item.registerLetter);
+    setSelectedItem(null);
+    setSelectedItemIdFromRoute(item.itemId);
+    pushRegisterHash(item.href);
   }
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>, item: BoardItem) {
@@ -1101,8 +1607,7 @@ ${liquidGlassRuntimeSelectors} {
         <nav className="register-mobile-tabs" aria-label="Register">
           {registerEntries.map((entry, index) => {
             const hasEntry = registerEntryHasContent(entry, lettersWithEntries);
-            const ariaLabel =
-              entry.type === "intro" ? "Cover" : entry.type === "info" ? "Info" : `Register ${entry.label}`;
+            const ariaLabel = `Register ${entry.label}`;
 
             return (
               <button
@@ -1111,8 +1616,6 @@ ${liquidGlassRuntimeSelectors} {
                   entry.label.length > 1 ? "register-mobile-tab-wide" : "",
                   hasEntry ? "register-mobile-tab-filled" : "",
                   !hasEntry ? "register-mobile-tab-disabled" : "",
-                  entry.type === "intro" ? "register-mobile-tab-intro" : "",
-                  entry.type === "info" ? "register-mobile-tab-info" : "",
                   activeLetter === entry.id ? "register-mobile-tab-active" : "",
                 ].join(" ")}
                 aria-label={ariaLabel}
@@ -1128,22 +1631,7 @@ ${liquidGlassRuntimeSelectors} {
                 type="button"
               >
                 <RegisterMobileTabShape isWide={entry.label.length > 1} />
-                <span className="register-mobile-tab-label">
-                  {entry.type === "intro" ? (
-                    <Image
-                      alt=""
-                      aria-hidden="true"
-                      draggable={false}
-                      height={17}
-                      src="/images/brand/marianne.svg"
-                      width={17}
-                    />
-                  ) : entry.type === "info" ? (
-                    <Info aria-hidden="true" size={13} strokeWidth={2.2} />
-                  ) : (
-                    entry.label
-                  )}
-                </span>
+                <span className="register-mobile-tab-label">{entry.label}</span>
               </button>
             );
           })}
@@ -1152,54 +1640,17 @@ ${liquidGlassRuntimeSelectors} {
         <div className="recipe-register-page">
           <div className="recipe-register-paper" ref={boardRef}>
             <div
-              className={[
-                "recipe-register-canvas",
-                activeRegisterEntry?.type === "intro" ? "recipe-register-canvas-cover" : "",
-                activeRegisterEntry?.type === "info" ? "recipe-register-canvas-info" : "",
-              ].join(" ")}
+              className="recipe-register-canvas"
               style={
                 {
                   "--register-canvas-min-height": `${canvasMinHeight}px`,
                 } as CSSProperties
               }
             >
-              {activeRegisterEntry?.type === "intro" ? (
-                <section className="register-cover-page" aria-label="Cover">
-                  <div className="register-cover-content">
-                    <button
-                      className="register-cover-label"
-                      onClick={handleCoverOpen}
-                      type="button"
-                    >
-                      <Image
-                        alt=""
-                        aria-hidden="true"
-                        className="register-cover-label-image"
-                        draggable={false}
-                        height={1395}
-                        priority
-                        src="/images/brand/register-book-label.png"
-                        width={2222}
-                      />
-                      <span>Erstes Register öffnen</span>
-                    </button>
-                    <div className="register-cover-intro">
-                      <p>
-                        Mariannes Rezeptschatz ist ein digitales Registerbuch aus handschriftlichen
-                        Rezeptkarten, losen Fundstücken und kleinen Erinnerungen aus Omas Küche.
-                      </p>
-                      <p>
-                        Zwischen den Buchstaben liegen Originale, neu aufbereitete Rezepte und
-                        Beiträge von Gastautorinnen. Zum Schmökern, Wiederfinden und Weitergeben.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-              ) : activeRegisterEntry?.type === "info" ? (
-                <InfoRegisterPage />
-              ) : boardItems.length === 0 ? null : (
+              {boardItems.length === 0 ? null : (
                 boardItems.map((item) => {
                   const position = getItemPosition(item);
+                  const itemTypeIcon = getBoardItemTypeIcon(item);
 
                   return (
                     <button
@@ -1226,7 +1677,7 @@ ${liquidGlassRuntimeSelectors} {
                       <span className="register-card-pin" aria-hidden="true" />
                       <span className="register-card-image">
                         <Image
-                          alt={item.kind === "recipe" ? `Originalkarte ${item.title}` : item.title}
+                          alt={item.kind === "artifact" ? item.title : `Originalkarte ${item.title}`}
                           draggable={false}
                           fill
                           sizes="(max-width: 700px) 90vw, 420px"
@@ -1237,11 +1688,7 @@ ${liquidGlassRuntimeSelectors} {
                         {item.kind === "recipe" ? (
                           <>
                             <span className="register-card-chip">
-                              {item.recipe.slug === "eierlikoer" ? (
-                                <Martini aria-hidden="true" size={17} strokeWidth={1.9} />
-                              ) : (
-                                <Cookie aria-hidden="true" size={17} strokeWidth={1.9} />
-                              )}
+                              {createElement(itemTypeIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
                               {item.title}
                             </span>
                             <span className="register-card-chip">
@@ -1249,13 +1696,21 @@ ${liquidGlassRuntimeSelectors} {
                               {getCardTimeLabel(item.recipe)}
                             </span>
                           </>
+                        ) : item.kind === "recipe-card" ? (
+                          <>
+                            <span className="register-card-chip">
+                              {createElement(itemTypeIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
+                              {item.title}
+                            </span>
+                            <span className="register-card-chip">Originalkarte</span>
+                          </>
                         ) : (
                           <>
                             <span className="register-card-chip">
-                              <ImageIcon aria-hidden="true" size={17} strokeWidth={1.9} />
+                              {createElement(itemTypeIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
                               {item.title}
                             </span>
-                            <span className="register-card-chip">{item.registerLetter}</span>
+                            <span className="register-card-chip">{getArtifactTypeLabel(item.artifactType)}</span>
                           </>
                         )}
                       </span>
@@ -1272,14 +1727,13 @@ ${liquidGlassRuntimeSelectors} {
           >
             {registerEntries.map((entry, index) => {
               const hasEntry = registerEntryHasContent(entry, lettersWithEntries);
-              const ariaLabel =
-                entry.type === "intro" ? "Cover" : entry.type === "info" ? "Info" : `Register ${entry.label}`;
+              const ariaLabel = `Register ${entry.label}`;
 
               return (
                 <button
                   className={[
                     "register-side-tab",
-                    `register-side-tab-${entry.type}`,
+                    "register-side-tab-letter",
                     entry.label.length > 1 ? "register-side-tab-wide" : "",
                     hasEntry ? "register-side-tab-filled" : "",
                     !hasEntry ? "register-side-tab-disabled" : "",
@@ -1297,29 +1751,34 @@ ${liquidGlassRuntimeSelectors} {
                   }
                   type="button"
                 >
-                  <RegisterSideTabShape isIntro={entry.type === "intro"} />
-                  <span className="register-side-tab-label">
-                    {entry.type === "intro" ? (
-                      <Image
-                        alt=""
-                        aria-hidden="true"
-                        draggable={false}
-                        height={21}
-                        src="/images/brand/marianne.svg"
-                        width={21}
-                      />
-                    ) : entry.type === "info" ? (
-                      <Info aria-hidden="true" size={18} strokeWidth={2.1} />
-                    ) : (
-                      entry.label
-                    )}
-                  </span>
+                  <RegisterSideTabShape />
+                  <span className="register-side-tab-label">{entry.label}</span>
                 </button>
               );
             })}
           </nav>
         </div>
       </div>
+
+      {isCoverVisible ? <RegisterCover isOpening={isCoverOpening} onOpen={handleCoverOpen} /> : null}
+
+      {!isCoverVisible ? (
+        <RegisterFloatingMenu
+          onIntro={() => openFloatingPanel("intro")}
+          onSearch={() => openFloatingPanel("search")}
+        />
+      ) : null}
+
+      {floatingPanel ? (
+        <RegisterFloatingPanel
+          onClose={closeFloatingPanel}
+          onQueryChange={setSearchQuery}
+          onSelectItem={openItemFromSearch}
+          query={searchQuery}
+          recipes={recipes}
+          type={floatingPanel}
+        />
+      ) : null}
 
       {selectedItem ? (
         <div
@@ -1337,6 +1796,8 @@ ${liquidGlassRuntimeSelectors} {
                 onClose={closeSelectedItem}
                 recipe={selectedItem.recipe}
               />
+            ) : selectedItem.kind === "recipe-card" ? (
+              <RecipeCardDetail item={selectedItem} onClose={closeSelectedItem} />
             ) : (
               <ArtifactDetail item={selectedItem} onClose={closeSelectedItem} />
             )}
@@ -1359,7 +1820,7 @@ function RecipeDetail({
   const [servings, setServings] = useState(recipe.servingsDefault);
   const [visualMode, setVisualMode] = useState<"recipe" | "photo">("recipe");
   const servingsMultiplier = servings / recipe.servingsDefault;
-  const RecipeIcon = getRecipeIcon(recipe);
+  const recipeIcon = getRecipeIcon(recipe);
   const servingsUnit = getServingsUnit(recipe);
   const authorLabel = getRecipeAuthorLabel(recipe);
   const hasPhoto = Boolean(recipe.photoImage);
@@ -1377,8 +1838,12 @@ function RecipeDetail({
   }
 
   useEffect(() => {
-    setVisualMode("recipe");
-    setServings(recipe.servingsDefault);
+    const timeout = window.setTimeout(() => {
+      setVisualMode("recipe");
+      setServings(recipe.servingsDefault);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [recipe.servingsDefault, recipe.slug]);
 
   return (
@@ -1389,7 +1854,7 @@ function RecipeDetail({
       <header className="recipe-view-toolbar">
         <div className="recipe-view-toolbar-group">
           <span className="recipe-view-chip">
-            <RecipeIcon aria-hidden="true" size={18} strokeWidth={1.9} />
+            {createElement(recipeIcon, { "aria-hidden": "true", size: 18, strokeWidth: 1.9 })}
             {recipe.title}
           </span>
           <span className="recipe-view-chip">
@@ -1491,7 +1956,7 @@ function RecipeDetail({
               </span>
             </span>
             <span>
-              <RecipeIcon aria-hidden="true" size={18} strokeWidth={1.9} />
+              {createElement(recipeIcon, { "aria-hidden": "true", size: 18, strokeWidth: 1.9 })}
               {getRecipeCategoryLabel(recipe)}
             </span>
             <span>
@@ -1555,6 +2020,62 @@ function RecipeDetail({
   );
 }
 
+function RecipeCardDetail({
+  item,
+  onClose,
+}: {
+  item: Extract<BoardItem, { kind: "recipe-card" }>;
+  onClose: () => void;
+}) {
+  const itemTypeIcon = getRecipeEntryTypeIcon(item.recipe);
+
+  return (
+    <div
+      className="recipe-view-card recipe-card-only-view"
+      style={{ "--recipe-view-bg": item.color } as CSSProperties}
+    >
+      <header className="recipe-view-toolbar">
+        <div className="recipe-view-toolbar-group">
+          <span className="recipe-view-chip">
+            {createElement(itemTypeIcon, { "aria-hidden": "true", size: 18, strokeWidth: 1.9 })}
+            {item.title}
+          </span>
+          <span className="recipe-view-chip">Originalkarte</span>
+        </div>
+
+        <button
+          aria-label="Rezeptkarte schließen"
+          className="recipe-view-close"
+          onClick={onClose}
+          type="button"
+        >
+          <X aria-hidden="true" size={18} strokeWidth={2.1} />
+        </button>
+      </header>
+
+      <div className="recipe-view-graphic recipe-view-graphic-single-tool">
+        <div className="recipe-view-original">
+          <ZoomableImage
+            alt={`Originalkarte ${item.title}`}
+            priority
+            sizes="(max-width: 900px) 92vw, 870px"
+            src={item.image}
+          />
+        </div>
+      </div>
+
+      {item.recipe.story ? (
+        <div className="recipe-view-content recipe-card-only-content">
+          <section className="recipe-view-intro">
+            <h1>{item.title}</h1>
+            <p className="recipe-detail-story">{item.recipe.story}</p>
+          </section>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function ArtifactDetail({
   item,
   onClose,
@@ -1562,14 +2083,17 @@ function ArtifactDetail({
   item: Extract<BoardItem, { kind: "artifact" }>;
   onClose: () => void;
 }) {
+  const itemTypeIcon = getArtifactTypeIcon(item.artifactType);
+
   return (
     <div className="artifact-view-card">
       <header className="artifact-view-toolbar">
         <div className="artifact-view-title-row">
           <span className="artifact-view-chip">
-            <ImageIcon aria-hidden="true" size={18} strokeWidth={1.9} />
+            {createElement(itemTypeIcon, { "aria-hidden": "true", size: 18, strokeWidth: 1.9 })}
             {item.title}
           </span>
+          <span className="artifact-view-chip">{getArtifactTypeLabel(item.artifactType)}</span>
         </div>
 
         <button
