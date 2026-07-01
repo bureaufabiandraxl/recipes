@@ -35,6 +35,8 @@ interface CollectedBookItem {
   caption?: string;
   captionLink?: string;
   image?: string;
+  secondaryImage?: string;
+  size?: ArtifactSize;
 }
 
 interface RecipeRegisterBookProps {
@@ -80,6 +82,8 @@ type BoardItem =
       color: string;
       rotation: number;
       image: string;
+      secondaryImage?: string;
+      size: ArtifactSize;
       artifactType: "notiz" | "bild" | "fundstueck";
       position: BoardPosition;
     };
@@ -121,9 +125,11 @@ interface RegisterRouteState {
 }
 
 type FloatingPanelType = "intro" | "search";
+type ArtifactSize = "S" | "M" | "L" | "XL";
 
 const cardColors = ["#fec8ff", "#deffc8", "#fff36e", "#e3fdff", "#ffb5e5", "#ff9e66"];
 const recipeCardOnlyColor = "#d9e7ff";
+const fallbackRecipeImage = "/images/recipes/eiskonfekt.svg";
 const syncedCollectedBookItems = generatedArtifacts as CollectedBookItem[];
 const recipeColorOverrides: Record<string, string> = {
   kirchtagskrapfen: "#fff36e",
@@ -200,6 +206,13 @@ const liquidGlassRuntimeSelectors = [
   ".register-search-input-shell",
   ".register-search-result",
 ].join(",\n");
+
+function resolveImageSrc(src: string | null | undefined, fallback = fallbackRecipeImage) {
+  const resolvedSrc = src?.trim();
+
+  return resolvedSrc || fallback;
+}
+
 const introParagraphs = [
   "Mariannes Rezeptschatz ist ein digitales Registerbuch aus handschriftlichen Rezeptkarten, losen Fundstücken und kleinen Erinnerungen aus Omas Küche.",
   "Die Originale bleiben sichtbar: als Scans, Fotos und Artefakte, die auf den linierten Seiten liegen und sich entdecken lassen. Daneben gibt es lesbare Rezeptfassungen, Tipps und Hinweise zu Gastautorinnen.",
@@ -671,7 +684,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
           ? recipeCardOnlyColor
           : recipe.cardColor ?? recipeColorOverrides[recipe.slug] ?? cardColors[index % cardColors.length],
         rotation: 0,
-        image: recipe.originalCardImage,
+        image: resolveImageSrc(recipe.originalCardImage),
         recipe,
         position: defaultPositions[index] ?? {
           x: 8 + (index % 3) * 24,
@@ -696,7 +709,9 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
         captionLink: item.captionLink,
         color: index % 2 === 0 ? "#fff6df" : "#e7f3ef",
         rotation: 0,
-        image: item.image ?? fallbackRecipe?.originalCardImage ?? "/images/recipes/eiskonfekt.svg",
+        image: resolveImageSrc(item.image ?? fallbackRecipe?.originalCardImage),
+        secondaryImage: item.secondaryImage ? resolveImageSrc(item.secondaryImage) : undefined,
+        size: normalizeArtifactSize(item.size),
         artifactType: item.type,
         position: defaultPositions[index + recipeItems.length] ?? {
           x: 18 + (index % 3) * 22,
@@ -719,6 +734,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
             color: "#ffffff",
             rotation: 0,
             image: "/images/artifacts/jesus.png",
+            size: "M",
             artifactType: "bild",
             position: { x: 46.8, y: 15.5 },
           },
@@ -733,6 +749,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
             color: "#ffffff",
             rotation: 0,
             image: "/images/artifacts/backin.png",
+            size: "M",
             artifactType: "fundstueck",
             position: { x: 15.6, y: 102.3 },
           },
@@ -762,6 +779,18 @@ function getArtifactDisplayClass(item: BoardItem) {
   }
 
   return item.artifactType === "notiz" ? "artifact-note" : "artifact-image";
+}
+
+function normalizeArtifactSize(size: CollectedBookItem["size"]): ArtifactSize {
+  return size === "S" || size === "L" || size === "XL" ? size : "M";
+}
+
+function getArtifactSizeClass(item: BoardItem) {
+  if (item.kind !== "artifact") {
+    return "";
+  }
+
+  return `artifact-size-${item.size.toLowerCase()}`;
 }
 
 function getItemTopPx(position: BoardPosition) {
@@ -874,6 +903,7 @@ function RegisterCover({
         type="button"
       >
         <span className="register-launch-book">
+          <span className="register-launch-pages" aria-hidden="true" />
           <span className="register-launch-spine" aria-hidden="true" />
           <span className="register-launch-front">
             <span className="register-launch-linen-corner register-launch-linen-corner-top" aria-hidden="true" />
@@ -980,7 +1010,7 @@ function RegisterSearchPanel({
             autoFocus
             aria-label="Nach Zutaten oder Gerichten suchen"
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Zutat, Gericht oder Fundstück"
+            placeholder="Zutat, Gericht, Objekt"
             type="search"
             value={query}
           />
@@ -1477,7 +1507,7 @@ ${liquidGlassRuntimeSelectors} {
       setSelectedItem(null);
       setSelectedItemIdFromRoute(null);
       pushRegisterHash(getRegisterHash(firstAvailableRegisterLetter));
-    }, 980);
+    }, 1420);
   }
 
   function openFloatingPanel(type: FloatingPanelType) {
@@ -1658,6 +1688,7 @@ ${liquidGlassRuntimeSelectors} {
                         "register-board-card",
                         item.kind === "artifact" ? "register-board-artifact" : "",
                         getArtifactDisplayClass(item),
+                        getArtifactSizeClass(item),
                         draggingItemId === item.id ? "register-board-card-dragging" : "",
                       ].join(" ")}
                       key={item.id}
@@ -1829,7 +1860,7 @@ function RecipeDetail({
   const hasTips = recipe.tips.length > 0;
   const hasContentSections = hasIngredients || hasSteps || hasTips;
   const visualImage =
-    visualMode === "photo" && recipe.photoImage ? recipe.photoImage : recipe.originalCardImage;
+    visualMode === "photo" && recipe.photoImage ? recipe.photoImage : resolveImageSrc(recipe.originalCardImage);
   const visualAlt =
     visualMode === "photo" ? `Foto zu ${recipe.title}` : `Originalkarte ${recipe.title}`;
 
@@ -2084,6 +2115,8 @@ function ArtifactDetail({
   onClose: () => void;
 }) {
   const itemTypeIcon = getArtifactTypeIcon(item.artifactType);
+  const detailImages = [item.image, item.secondaryImage].filter(Boolean) as string[];
+  const hasMultipleImages = detailImages.length > 1;
 
   return (
     <div className="artifact-view-card">
@@ -2106,8 +2139,26 @@ function ArtifactDetail({
         </button>
       </header>
 
-      <div className="artifact-view-image-area">
-        <ZoomableImage alt={item.caption ?? item.title} priority sizes="92vw" src={item.image} />
+      <div
+        className={[
+          "artifact-view-image-area",
+          hasMultipleImages ? "artifact-view-image-area-multiple" : "",
+        ].join(" ")}
+      >
+        {hasMultipleImages ? (
+          detailImages.map((image, index) => (
+            <div className="artifact-view-image-slot" key={image}>
+              <ZoomableImage
+                alt={`${item.caption ?? item.title} ${index + 1}`}
+                priority={index === 0}
+                sizes="(max-width: 900px) 92vw, 46vw"
+                src={image}
+              />
+            </div>
+          ))
+        ) : (
+          <ZoomableImage alt={item.caption ?? item.title} priority sizes="92vw" src={item.image} />
+        )}
       </div>
 
       <footer className="artifact-view-caption">

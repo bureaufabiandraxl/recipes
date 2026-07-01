@@ -9,6 +9,8 @@ interface CollectedBookItem {
   caption?: string;
   captionLink?: string;
   image?: string;
+  secondaryImage?: string;
+  size?: "S" | "M" | "L" | "XL";
 }
 
 export const recipes: Recipe[] = [

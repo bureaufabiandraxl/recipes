@@ -66,8 +66,10 @@ const artifactFields = [
   "title",
   "artifact_description",
   "artifact_image",
+  "artifact_secondary_image",
   "artifact_caption",
   "artifact_caption_link",
+  "artifact_class",
 ].join(",");
 
 function extensionFromContentType(contentType, fallback = ".bin") {
@@ -158,6 +160,18 @@ function normalizeColor(value) {
   return undefined;
 }
 
+function normalizeArtifactSize(value) {
+  const size = String(value ?? "").trim().toUpperCase();
+
+  return ["S", "M", "L", "XL"].includes(size) ? size : "M";
+}
+
+function optionalString(value) {
+  const stringValue = String(value ?? "").trim();
+
+  return stringValue || undefined;
+}
+
 function encodeFilter(filter) {
   return encodeURIComponent(JSON.stringify(filter));
 }
@@ -202,9 +216,9 @@ async function main() {
         cardColor: isRecipeCardOnly ? undefined : normalizeColor(recipe.card_color),
         shortDescription: "",
         story: recipe.story ?? "",
-        originalCardImage: originalCardImage ?? "",
+        originalCardImage: optionalString(originalCardImage) ?? "/images/recipes/eiskonfekt.svg",
         photoImage,
-        coverImage: originalCardImage ?? "",
+        coverImage: optionalString(originalCardImage),
         galleryImages: [],
         servingsDefault: recipe.servings_default ?? 1,
         servingsUnit: recipe.servings_unit ?? undefined,
@@ -247,6 +261,8 @@ async function main() {
       caption: artifact.artifact_caption ?? undefined,
       captionLink: artifact.artifact_caption_link ?? undefined,
       image: (await downloadAsset(artifact.artifact_image)) ?? "",
+      secondaryImage: await downloadAsset(artifact.artifact_secondary_image),
+      size: normalizeArtifactSize(artifact.artifact_class),
     })),
   );
 
