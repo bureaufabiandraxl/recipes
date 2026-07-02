@@ -3,7 +3,7 @@ import type { Recipe } from "@/types/recipe";
 interface CollectedBookItem {
   id: string;
   registerLetter: string;
-  type: "notiz" | "bild" | "fundstueck";
+  type: "originalrezept_bild" | "bild" | "fundstueck";
   title: string;
   description: string;
   caption?: string;
@@ -11,6 +11,7 @@ interface CollectedBookItem {
   image?: string;
   secondaryImage?: string;
   size?: "S" | "M" | "L" | "XL";
+  categoryIcon?: string;
 }
 
 export const recipes: Recipe[] = [

@@ -6,7 +6,9 @@
     "prebuild": "node scripts/write-build-info.mjs",
     "dev": "next dev",
     "cms:sync": "node scripts/sync-directus.mjs",
+    "cms:migrate-entry-types": "node scripts/migrate-directus-entry-types.mjs",
     "build": "npm run cms:sync && next build",
+    "deploy": "node scripts/deploy-live.mjs",
     "start": "next start",
     "lint": "eslint"
   },

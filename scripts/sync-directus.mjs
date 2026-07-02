@@ -70,6 +70,7 @@ const artifactFields = [
   "artifact_caption",
   "artifact_caption_link",
   "artifact_class",
+  "category_icon",
 ].join(",");
 
 function extensionFromContentType(contentType, fallback = ".bin") {
@@ -166,6 +167,20 @@ function normalizeArtifactSize(value) {
   return ["S", "M", "L", "XL"].includes(size) ? size : "M";
 }
 
+function normalizeArtifactType(value) {
+  const type = String(value ?? "").trim();
+
+  if (type === "originalrezept_bild" || type === "bild" || type === "fundstueck") {
+    return type;
+  }
+
+  if (type === "notiz") {
+    return "fundstueck";
+  }
+
+  return "fundstueck";
+}
+
 function optionalString(value) {
   const stringValue = String(value ?? "").trim();
 
@@ -228,7 +243,7 @@ async function main() {
         totalTime: preparationTime,
         difficulty: isRecipeCardOnly ? "einfach" : recipe.difficulty ?? "einfach",
         category,
-        categoryIcon: isRecipeCardOnly ? undefined : recipe.category_icon ?? undefined,
+        categoryIcon: recipe.category_icon ?? undefined,
         categories: category ? [category] : [],
         tags: [],
         collectedItems: [],
@@ -245,7 +260,7 @@ async function main() {
 
   const artifactFilter = encodeFilter({
     status: { _eq: "published" },
-    entry_type: { _in: ["notiz", "bild", "fundstueck"] },
+    entry_type: { _in: ["notiz", "originalrezept_bild", "bild", "fundstueck"] },
   });
   const artifactResponse = await directusFetch(
     `/items/recipes?filter=${artifactFilter}&sort=sort,title&limit=-1&fields=${artifactFields}`,
@@ -255,7 +270,7 @@ async function main() {
     artifactResult.data.map(async (artifact) => ({
       id: artifact.slug ?? artifact.id,
       registerLetter: artifact.register_letter ?? artifact.title?.charAt(0).toUpperCase() ?? "A",
-      type: artifact.entry_type ?? "fundstueck",
+      type: normalizeArtifactType(artifact.entry_type),
       title: artifact.title ?? "Ohne Titel",
       description: artifact.artifact_description ?? "",
       caption: artifact.artifact_caption ?? undefined,
@@ -263,6 +278,7 @@ async function main() {
       image: (await downloadAsset(artifact.artifact_image)) ?? "",
       secondaryImage: await downloadAsset(artifact.artifact_secondary_image),
       size: normalizeArtifactSize(artifact.artifact_class),
+      categoryIcon: artifact.category_icon ?? undefined,
     })),
   );
 

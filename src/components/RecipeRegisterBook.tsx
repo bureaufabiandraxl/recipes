@@ -8,10 +8,10 @@ import {
   Clock3,
   Cookie,
   ImageIcon,
+  ListOrdered,
   Martini,
   Minimize2,
   Minus,
-  PackageSearch,
   Plus,
   ReceiptText,
   Search,
@@ -20,16 +20,20 @@ import {
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { createElement, useEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent } from "react";
+import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { collectedBookItems } from "@/data/recipes";
 import generatedArtifacts from "@/data/directus-artifacts.generated.json";
 import type { Recipe } from "@/types/recipe";
 
+type ArtifactSize = "S" | "M" | "L" | "XL";
+type ArtifactType = "originalrezept_bild" | "bild" | "fundstueck";
+type LegacyArtifactType = ArtifactType | "notiz";
+
 interface CollectedBookItem {
   id: string;
   registerLetter: string;
-  type: "notiz" | "bild" | "fundstueck";
+  type: LegacyArtifactType;
   title: string;
   description: string;
   caption?: string;
@@ -37,6 +41,7 @@ interface CollectedBookItem {
   image?: string;
   secondaryImage?: string;
   size?: ArtifactSize;
+  categoryIcon?: string;
 }
 
 interface RecipeRegisterBookProps {
@@ -59,6 +64,7 @@ type BoardItem =
       image: string;
       recipe: Recipe;
       position: BoardPosition;
+      layerIndex: number;
     }
   | {
       id: string;
@@ -70,6 +76,7 @@ type BoardItem =
       image: string;
       recipe: Recipe;
       position: BoardPosition;
+      layerIndex: number;
     }
   | {
       id: string;
@@ -84,8 +91,10 @@ type BoardItem =
       image: string;
       secondaryImage?: string;
       size: ArtifactSize;
-      artifactType: "notiz" | "bild" | "fundstueck";
+      categoryIcon?: string;
+      artifactType: ArtifactType;
       position: BoardPosition;
+      layerIndex: number;
     };
 
 interface SearchableRegisterItem {
@@ -96,6 +105,7 @@ interface SearchableRegisterItem {
   description: string;
   registerLetter: string;
   typeLabel: string;
+  color: string;
   icon: LucideIcon;
   metaParts: string[];
   searchText: string;
@@ -125,7 +135,6 @@ interface RegisterRouteState {
 }
 
 type FloatingPanelType = "intro" | "search";
-type ArtifactSize = "S" | "M" | "L" | "XL";
 
 const cardColors = ["#fec8ff", "#deffc8", "#fff36e", "#e3fdff", "#ffb5e5", "#ff9e66"];
 const recipeCardOnlyColor = "#d9e7ff";
@@ -133,6 +142,11 @@ const fallbackRecipeImage = "/images/recipes/eiskonfekt.svg";
 const syncedCollectedBookItems = generatedArtifacts as CollectedBookItem[];
 const recipeColorOverrides: Record<string, string> = {
   kirchtagskrapfen: "#fff36e",
+};
+const artifactSearchColors: Record<ArtifactType, string> = {
+  originalrezept_bild: "#f1eadf",
+  bild: "#dff3ff",
+  fundstueck: "#ece7dd",
 };
 const registerPageBaseHeight = 900;
 const registerPagePadding = 80;
@@ -198,13 +212,16 @@ const liquidGlassRuntimeSelectors = [
   ".artifact-view-toolbar",
   ".artifact-view-chip",
   ".artifact-view-close",
+  ".artifact-view-side-button",
   ".artifact-view-caption",
   ".register-floating-menu",
   ".register-floating-menu button",
+  ".register-floating-panel-backdrop",
   ".register-floating-panel",
   ".register-floating-panel-close",
   ".register-search-input-shell",
   ".register-search-result",
+  ".register-search-empty",
 ].join(",\n");
 
 function resolveImageSrc(src: string | null | undefined, fallback = fallbackRecipeImage) {
@@ -314,73 +331,85 @@ function getRecipeCategoryLabel(recipe: Recipe) {
   return recipe.category ?? recipe.categories[0] ?? recipe.entryType;
 }
 
-function getRecipeIcon(recipe: Recipe): LucideIcon {
-  const iconName = recipe.categoryIcon;
-
-  if (iconName && iconName in LucideIcons) {
-    const Icon = LucideIcons[iconName as keyof typeof LucideIcons];
-
-    if (Icon) {
-      return Icon as LucideIcon;
-    }
+function getLucideIconByName(iconName: string | null | undefined, fallback: LucideIcon): LucideIcon {
+  if (!iconName) {
+    return fallback;
   }
 
-  return recipe.slug === "eierlikoer" ? Martini : Cookie;
+  const Icon = (LucideIcons as Record<string, unknown>)[iconName];
+
+  return typeof Icon === "function" ? (Icon as LucideIcon) : fallback;
+}
+
+function getRecipeIcon(recipe: Recipe): LucideIcon {
+  return getLucideIconByName(recipe.categoryIcon, recipe.slug === "eierlikoer" ? Martini : Cookie);
+}
+
+function normalizeArtifactType(type: LegacyArtifactType | null | undefined): ArtifactType {
+  if (type === "originalrezept_bild" || type === "bild" || type === "fundstueck") {
+    return type;
+  }
+
+  return "fundstueck";
 }
 
 function getRecipeEntryTypeLabel(recipe: Recipe) {
   switch (recipe.entryType) {
     case "rezeptkarte":
-      return "Originalkarte";
-    case "notiz":
-      return "Notiz";
+      return "Originalrezept";
+    case "originalrezept_bild":
+      return "Originalrezept";
     case "bild":
       return "Bild";
     case "fundstueck":
       return "Fundstück";
     case "rezept":
     default:
-      return "Rezept";
+      return "Nachgekocht";
   }
 }
 
-function getArtifactTypeLabel(type: CollectedBookItem["type"]) {
-  switch (type) {
-    case "notiz":
-      return "Notiz";
+function getArtifactTypeLabel(type: LegacyArtifactType) {
+  switch (normalizeArtifactType(type)) {
+    case "originalrezept_bild":
+      return "Originalrezept";
     case "bild":
       return "Bild";
     case "fundstueck":
     default:
       return "Fundstück";
   }
+}
+
+function getArtifactColor(type: LegacyArtifactType) {
+  return artifactSearchColors[normalizeArtifactType(type)] ?? artifactSearchColors.fundstueck;
 }
 
 function getRecipeEntryTypeIcon(recipe: Recipe): LucideIcon {
   switch (recipe.entryType) {
     case "rezeptkarte":
       return ReceiptText;
-    case "notiz":
-      return StickyNote;
+    case "originalrezept_bild":
+      return ReceiptText;
     case "bild":
       return ImageIcon;
     case "fundstueck":
-      return PackageSearch;
+      return StickyNote;
     case "rezept":
     default:
-      return ChefHat;
+      return ListOrdered;
   }
 }
 
-function getArtifactTypeIcon(type: CollectedBookItem["type"]): LucideIcon {
-  switch (type) {
-    case "notiz":
-      return StickyNote;
+function getArtifactTypeIcon(type: LegacyArtifactType): LucideIcon {
+  switch (normalizeArtifactType(type)) {
+    case "originalrezept_bild":
+      return ReceiptText;
     case "bild":
       return ImageIcon;
     case "fundstueck":
     default:
-      return PackageSearch;
+      return StickyNote;
   }
 }
 
@@ -389,7 +418,15 @@ function getBoardItemTypeIcon(item: BoardItem): LucideIcon {
     return getArtifactTypeIcon(item.artifactType);
   }
 
+  if (item.kind === "recipe") {
+    return getRecipeIcon(item.recipe);
+  }
+
   return getRecipeEntryTypeIcon(item.recipe);
+}
+
+function getArtifactTitleIcon(item: Extract<BoardItem, { kind: "artifact" }>): LucideIcon | null {
+  return item.categoryIcon ? getLucideIconByName(item.categoryIcon, StickyNote) : null;
 }
 
 function normalizeSearchText(value: string) {
@@ -422,8 +459,10 @@ function getRecipeSearchText(recipe: Recipe) {
 }
 
 function getArtifactSearchText(item: CollectedBookItem) {
+  const artifactType = normalizeArtifactType(item.type);
+
   return normalizeSearchText(
-    [item.title, getArtifactTypeLabel(item.type), item.type, item.description, item.caption ?? "", item.registerLetter]
+    [item.title, getArtifactTypeLabel(artifactType), artifactType, item.description, item.caption ?? "", item.registerLetter]
       .filter(Boolean)
       .join(" "),
   );
@@ -512,9 +551,10 @@ function createSearchableRegisterItems(recipes: Recipe[], normalizedQuery: strin
     const typeLabel = getRecipeEntryTypeLabel(recipe);
     const ingredientMatches = getIngredientMatches(recipe, normalizedQuery);
     const categoryLabel = recipe.entryType === "rezept" ? getRecipeCategoryLabel(recipe) : recipe.category;
-    const metaParts = [typeLabel, categoryLabel, `${recipe.registerLetter}-Register`, ...ingredientMatches].filter(
-      Boolean,
-    ) as string[];
+    const metaParts = [typeLabel, categoryLabel, ...ingredientMatches].filter(Boolean) as string[];
+    const color = isRecipeCardOnly
+      ? recipe.cardColor ?? recipeCardOnlyColor
+      : recipe.cardColor ?? recipeColorOverrides[recipe.slug] ?? cardColors[0];
 
     return {
       id: `${isRecipeCardOnly ? "recipe-card" : "recipe"}-${recipe.slug}`,
@@ -524,6 +564,7 @@ function createSearchableRegisterItems(recipes: Recipe[], normalizedQuery: strin
       description: recipe.shortDescription || recipe.story || typeLabel,
       registerLetter: recipe.registerLetter,
       typeLabel,
+      color,
       icon: getRecipeEntryTypeIcon(recipe),
       metaParts,
       searchText: getRecipeSearchText(recipe),
@@ -533,7 +574,8 @@ function createSearchableRegisterItems(recipes: Recipe[], normalizedQuery: strin
   const artifactItems = (syncedCollectedBookItems.length ? syncedCollectedBookItems : collectedBookItems).map<
     SearchableRegisterItem
   >((item) => {
-    const typeLabel = getArtifactTypeLabel(item.type);
+    const artifactType = normalizeArtifactType(item.type);
+    const typeLabel = getArtifactTypeLabel(artifactType);
 
     return {
       id: `artifact-${item.id}`,
@@ -543,8 +585,9 @@ function createSearchableRegisterItems(recipes: Recipe[], normalizedQuery: strin
       description: item.description || item.caption || typeLabel,
       registerLetter: item.registerLetter,
       typeLabel,
-      icon: getArtifactTypeIcon(item.type),
-      metaParts: [typeLabel, `${item.registerLetter}-Register`, item.caption ?? ""].filter(Boolean),
+      color: getArtifactColor(artifactType),
+      icon: getArtifactTypeIcon(artifactType),
+      metaParts: [typeLabel, item.caption ?? ""].filter(Boolean),
       searchText: getArtifactSearchText(item),
     };
   });
@@ -658,6 +701,24 @@ function getRandomizedBoardItem(item: BoardItem, seed: string, index: number): B
   };
 }
 
+function applyRandomizedBoardLayout(items: BoardItem[], seed: string) {
+  const randomizedItems = items.map((item, index) => getRandomizedBoardItem(item, seed, index));
+
+  if (!seed) {
+    return randomizedItems;
+  }
+
+  const randomLayerOrder = [...randomizedItems].sort((itemA, itemB) => {
+    return getSeededRandom(seed, `${itemA.id}:layer`) - getSeededRandom(seed, `${itemB.id}:layer`);
+  });
+  const layerIndexes = new Map(randomLayerOrder.map((item, index) => [item.id, index + 1]));
+
+  return randomizedItems.map((item) => ({
+    ...item,
+    layerIndex: layerIndexes.get(item.id) ?? item.layerIndex,
+  }));
+}
+
 function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = ""): BoardItem[] {
   const recipesForLetter = recipes
     .filter((recipe) => recipe.registerLetter === activeLetter)
@@ -686,6 +747,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
         rotation: 0,
         image: resolveImageSrc(recipe.originalCardImage),
         recipe,
+        layerIndex: index + 1,
         position: defaultPositions[index] ?? {
           x: 8 + (index % 3) * 24,
           y: 14 + Math.floor(index / 3) * 24,
@@ -698,6 +760,7 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
     .filter((item) => item.registerLetter === activeLetter)
     .map<BoardItem>((item, index) => {
       const fallbackRecipe = recipes[(index + 1) % recipes.length] ?? recipes[0];
+      const artifactType = normalizeArtifactType(item.type);
 
       return {
         id: `artifact-${item.id}`,
@@ -712,7 +775,9 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
         image: resolveImageSrc(item.image ?? fallbackRecipe?.originalCardImage),
         secondaryImage: item.secondaryImage ? resolveImageSrc(item.secondaryImage) : undefined,
         size: normalizeArtifactSize(item.size),
-        artifactType: item.type,
+        categoryIcon: item.categoryIcon,
+        artifactType,
+        layerIndex: recipeItems.length + index + 1,
         position: defaultPositions[index + recipeItems.length] ?? {
           x: 18 + (index % 3) * 22,
           y: 54 + Math.floor(index / 3) * 22,
@@ -735,7 +800,9 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
             rotation: 0,
             image: "/images/artifacts/jesus.png",
             size: "M",
+            categoryIcon: "Image",
             artifactType: "bild",
+            layerIndex: recipeItems.length + 1,
             position: { x: 46.8, y: 15.5 },
           },
           {
@@ -750,15 +817,15 @@ function createBoardItems(recipes: Recipe[], activeLetter: string, layoutSeed = 
             rotation: 0,
             image: "/images/artifacts/backin.png",
             size: "M",
+            categoryIcon: "StickyNote",
             artifactType: "fundstueck",
+            layerIndex: recipeItems.length + 2,
             position: { x: 15.6, y: 102.3 },
           },
         ]
       : [];
 
-  return [...recipeItems, ...exampleArtifactItems, ...collectedArtifactItems].map((item, index) =>
-    getRandomizedBoardItem(item, layoutSeed, index),
-  );
+  return applyRandomizedBoardLayout([...recipeItems, ...exampleArtifactItems, ...collectedArtifactItems], layoutSeed);
 }
 
 function getEstimatedItemHeight(item: BoardItem) {
@@ -778,7 +845,7 @@ function getArtifactDisplayClass(item: BoardItem) {
     return "";
   }
 
-  return item.artifactType === "notiz" ? "artifact-note" : "artifact-image";
+  return "artifact-image";
 }
 
 function normalizeArtifactSize(size: CollectedBookItem["size"]): ArtifactSize {
@@ -1025,11 +1092,16 @@ function RegisterSearchPanel({
         {searchResults.length ? (
           <div className="register-search-result-list">
             {searchResults.map((item) => {
+              const resultStyle = {
+                "--search-result-color": item.color,
+              } as CSSProperties;
+
               return (
                 <button
                   className="register-search-result"
                   key={item.id}
                   onClick={() => onSelectItem(item)}
+                  style={resultStyle}
                   type="button"
                 >
                   <span className="register-search-result-icon">
@@ -1037,8 +1109,14 @@ function RegisterSearchPanel({
                   </span>
                   <span className="register-search-result-body">
                     <strong>{item.title}</strong>
-                    <span>{item.description}</span>
-                    <small>{item.metaParts.join(" · ")}</small>
+                    {item.description ? <span>{item.description}</span> : null}
+                    {item.metaParts.length ? (
+                      <small className="register-search-result-meta">
+                        {item.metaParts.map((part) => (
+                          <span key={part}>{part}</span>
+                        ))}
+                      </small>
+                    ) : null}
                   </span>
                 </button>
               );
@@ -1099,12 +1177,14 @@ function RegisterFloatingPanel({
 function ZoomableImage({
   alt,
   className,
+  controlsAddon,
   priority,
   sizes,
   src,
 }: {
   alt: string;
   className?: string;
+  controlsAddon?: ReactNode;
   priority?: boolean;
   sizes: string;
   src: string;
@@ -1231,6 +1311,20 @@ function ZoomableImage({
     resetInteraction();
   }
 
+  const zoomControls = (
+    <div className="zoomable-image-controls">
+      <button aria-label="Verkleinern" onClick={() => changeZoom(0.82)} type="button">
+        <Minus aria-hidden="true" size={17} strokeWidth={2.2} />
+      </button>
+      <button aria-label="Zoom zurücksetzen und zentrieren" onClick={resetZoom} type="button">
+        <Minimize2 aria-hidden="true" size={17} strokeWidth={2.1} />
+      </button>
+      <button aria-label="Vergrößern" onClick={() => changeZoom(1.22)} type="button">
+        <Plus aria-hidden="true" size={17} strokeWidth={2.2} />
+      </button>
+    </div>
+  );
+
   return (
     <div
       aria-label={`${alt} vergrößern und verschieben`}
@@ -1241,35 +1335,44 @@ function ZoomableImage({
       onPointerUp={handlePointerUp}
       role="group"
     >
-      <Image
-        alt={alt}
-        className="zoomable-image-media"
-        draggable={false}
-        fill
-        priority={priority}
-        sizes={sizes}
-        src={src}
-        style={{
-          transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scale})`,
-        }}
-      />
-
-      <div
-        className="zoomable-image-controls"
-        onClick={(event) => event.stopPropagation()}
-        onDoubleClick={(event) => event.stopPropagation()}
-        onPointerDown={(event) => event.stopPropagation()}
-      >
-        <button aria-label="Verkleinern" onClick={() => changeZoom(0.82)} type="button">
-          <Minus aria-hidden="true" size={17} strokeWidth={2.2} />
-        </button>
-        <button aria-label="Zoom zurücksetzen und zentrieren" onClick={resetZoom} type="button">
-          <Minimize2 aria-hidden="true" size={17} strokeWidth={2.1} />
-        </button>
-        <button aria-label="Vergrößern" onClick={() => changeZoom(1.22)} type="button">
-          <Plus aria-hidden="true" size={17} strokeWidth={2.2} />
-        </button>
+      <div className="zoomable-image-motion">
+        <div
+          className="zoomable-image-visual"
+          style={{
+            transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${transform.scale})`,
+          }}
+        >
+          <Image
+            alt={alt}
+            className="zoomable-image-media"
+            draggable={false}
+            fill
+            priority={priority}
+            sizes={sizes}
+            src={src}
+          />
+        </div>
       </div>
+
+      {controlsAddon ? (
+        <div
+          className="zoomable-image-tool-row"
+          onClick={(event) => event.stopPropagation()}
+          onDoubleClick={(event) => event.stopPropagation()}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          {zoomControls}
+          {controlsAddon}
+        </div>
+      ) : (
+        <div
+          onClick={(event) => event.stopPropagation()}
+          onDoubleClick={(event) => event.stopPropagation()}
+          onPointerDown={(event) => event.stopPropagation()}
+        >
+          {zoomControls}
+        </div>
+      )}
     </div>
   );
 }
@@ -1292,9 +1395,37 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
   const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
-  const zIndexCounterRef = useRef(1);
+  const zIndexCounterRef = useRef(1000);
   const lastInteractionMovedRef = useRef(false);
   const coverOpenTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const previousStyle = document.getElementById(liquidGlassRuntimeStyleId);
+
+    if (previousStyle) {
+      previousStyle.remove();
+    }
+
+    const style = document.createElement("style");
+    style.id = liquidGlassRuntimeStyleId;
+    style.textContent = `
+${liquidGlassRuntimeSelectors} {
+  backdrop-filter: blur(20px) saturate(1.16) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.16) !important;
+}
+
+.recipe-detail-backdrop::before,
+.register-floating-panel-backdrop {
+  backdrop-filter: blur(20px) saturate(1.16) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.16) !important;
+}
+`;
+    document.head.appendChild(style);
+
+    return () => {
+      style.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -1310,27 +1441,6 @@ export function RecipeRegisterBook({ recipes }: RecipeRegisterBookProps) {
         window.clearTimeout(coverOpenTimeoutRef.current);
       }
     };
-  }, []);
-
-  useEffect(() => {
-    if (document.getElementById(liquidGlassRuntimeStyleId)) {
-      return;
-    }
-
-    const style = document.createElement("style");
-    style.id = liquidGlassRuntimeStyleId;
-    style.textContent = `
-${liquidGlassRuntimeSelectors} {
-  backdrop-filter: var(--liquid-glass-filter) !important;
-  -webkit-backdrop-filter: var(--liquid-glass-filter) !important;
-}
-
-.recipe-detail-backdrop::before {
-  backdrop-filter: blur(20px) saturate(1.16) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.16) !important;
-}
-`;
-    document.head.appendChild(style);
   }, []);
 
   useEffect(() => {
@@ -1681,6 +1791,9 @@ ${liquidGlassRuntimeSelectors} {
                 boardItems.map((item) => {
                   const position = getItemPosition(item);
                   const itemTypeIcon = getBoardItemTypeIcon(item);
+                  const categoryIcon = item.kind === "recipe" ? getRecipeIcon(item.recipe) : null;
+                  const categoryLabel = item.kind === "recipe" ? getRecipeCategoryLabel(item.recipe) : null;
+                  const artifactTitleIcon = item.kind === "artifact" ? getArtifactTitleIcon(item) : null;
 
                   return (
                     <button
@@ -1701,19 +1814,23 @@ ${liquidGlassRuntimeSelectors} {
                         "--card-rotation": `${item.rotation}deg`,
                         left: `${position.x}%`,
                         top: `${getItemTopPx(position)}px`,
-                        zIndex: zIndexes[item.id] ?? 1,
+                        zIndex: zIndexes[item.id] ?? item.layerIndex,
                       } as CSSProperties}
                       type="button"
                     >
                       <span className="register-card-pin" aria-hidden="true" />
                       <span className="register-card-image">
-                        <Image
-                          alt={item.kind === "artifact" ? item.title : `Originalkarte ${item.title}`}
-                          draggable={false}
-                          fill
-                          sizes="(max-width: 700px) 90vw, 420px"
-                          src={item.image}
-                        />
+                        {item.kind === "artifact" ? (
+                          <img alt={item.title} draggable={false} src={item.image} />
+                        ) : (
+                          <Image
+                            alt={`Originalkarte ${item.title}`}
+                            draggable={false}
+                            fill
+                            sizes="(max-width: 700px) 90vw, 420px"
+                            src={item.image}
+                          />
+                        )}
                       </span>
                       <span className="register-card-meta">
                         {item.kind === "recipe" ? (
@@ -1722,6 +1839,12 @@ ${liquidGlassRuntimeSelectors} {
                               {createElement(itemTypeIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
                               {item.title}
                             </span>
+                            {categoryIcon && categoryLabel ? (
+                              <span className="register-card-chip">
+                                {createElement(categoryIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
+                                {categoryLabel}
+                              </span>
+                            ) : null}
                             <span className="register-card-chip">
                               <Clock3 aria-hidden="true" size={17} strokeWidth={1.9} />
                               {getCardTimeLabel(item.recipe)}
@@ -1733,15 +1856,27 @@ ${liquidGlassRuntimeSelectors} {
                               {createElement(itemTypeIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
                               {item.title}
                             </span>
-                            <span className="register-card-chip">Originalkarte</span>
+                            <span className="register-card-chip">
+                              <ReceiptText aria-hidden="true" size={17} strokeWidth={1.9} />
+                              Originalrezept
+                            </span>
                           </>
                         ) : (
                           <>
                             <span className="register-card-chip">
-                              {createElement(itemTypeIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
+                              {artifactTitleIcon
+                                ? createElement(artifactTitleIcon, {
+                                    "aria-hidden": "true",
+                                    size: 17,
+                                    strokeWidth: 1.9,
+                                  })
+                                : null}
                               {item.title}
                             </span>
-                            <span className="register-card-chip">{getArtifactTypeLabel(item.artifactType)}</span>
+                            <span className="register-card-chip">
+                              {createElement(itemTypeIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.9 })}
+                              {getArtifactTypeLabel(item.artifactType)}
+                            </span>
                           </>
                         )}
                       </span>
@@ -2115,18 +2250,33 @@ function ArtifactDetail({
   onClose: () => void;
 }) {
   const itemTypeIcon = getArtifactTypeIcon(item.artifactType);
-  const detailImages = [item.image, item.secondaryImage].filter(Boolean) as string[];
-  const hasMultipleImages = detailImages.length > 1;
+  const titleIcon = getArtifactTitleIcon(item);
+  const [sideState, setSideState] = useState<{
+    activeSide: "front" | "back";
+    hasSideTransition: boolean;
+    itemId: string;
+  }>(() => ({
+    activeSide: "front",
+    hasSideTransition: false,
+    itemId: item.id,
+  }));
+  const activeSide = sideState.itemId === item.id ? sideState.activeSide : "front";
+  const hasSideTransition = sideState.itemId === item.id ? sideState.hasSideTransition : false;
+  const hasBackSide = Boolean(item.secondaryImage);
+  const activeImage = activeSide === "back" && item.secondaryImage ? item.secondaryImage : item.image;
 
   return (
     <div className="artifact-view-card">
       <header className="artifact-view-toolbar">
         <div className="artifact-view-title-row">
           <span className="artifact-view-chip">
-            {createElement(itemTypeIcon, { "aria-hidden": "true", size: 18, strokeWidth: 1.9 })}
+            {titleIcon ? createElement(titleIcon, { "aria-hidden": "true", size: 18, strokeWidth: 1.9 }) : null}
             {item.title}
           </span>
-          <span className="artifact-view-chip">{getArtifactTypeLabel(item.artifactType)}</span>
+          <span className="artifact-view-chip">
+            {createElement(itemTypeIcon, { "aria-hidden": "true", size: 18, strokeWidth: 1.9 })}
+            {getArtifactTypeLabel(item.artifactType)}
+          </span>
         </div>
 
         <button
@@ -2139,26 +2289,54 @@ function ArtifactDetail({
         </button>
       </header>
 
-      <div
-        className={[
-          "artifact-view-image-area",
-          hasMultipleImages ? "artifact-view-image-area-multiple" : "",
-        ].join(" ")}
-      >
-        {hasMultipleImages ? (
-          detailImages.map((image, index) => (
-            <div className="artifact-view-image-slot" key={image}>
-              <ZoomableImage
-                alt={`${item.caption ?? item.title} ${index + 1}`}
-                priority={index === 0}
-                sizes="(max-width: 900px) 92vw, 46vw"
-                src={image}
-              />
-            </div>
-          ))
-        ) : (
-          <ZoomableImage alt={item.caption ?? item.title} priority sizes="92vw" src={item.image} />
-        )}
+      <div className="artifact-view-image-area">
+        <div className="artifact-flip-stage">
+          <div
+            className={[
+              "artifact-flip-card",
+              hasSideTransition
+                ? activeSide === "back"
+                  ? "artifact-flip-card-back"
+                  : "artifact-flip-card-front"
+                : "",
+            ].join(" ")}
+          >
+            <ZoomableImage
+              alt={`${item.caption ?? item.title} ${activeSide === "back" ? "Rückseite" : "Vorderseite"}`}
+              controlsAddon={
+                hasBackSide ? (
+                  <button
+                    aria-label={activeSide === "front" ? "Rückseite anzeigen" : "Vorderseite anzeigen"}
+                    className="artifact-view-side-button"
+                    onClick={() => {
+                      setSideState((current) => {
+                        const currentSide = current.itemId === item.id ? current.activeSide : "front";
+
+                        return {
+                          activeSide: currentSide === "front" ? "back" : "front",
+                          hasSideTransition: true,
+                          itemId: item.id,
+                        };
+                      });
+                    }}
+                    type="button"
+                  >
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      className="artifact-view-side-icon"
+                      src={activeSide === "front" ? "/icons/rotate-3d-1.svg" : "/icons/rotate-3d-2.svg"}
+                    />
+                    <span>{activeSide === "front" ? "Rückseite" : "Vorderseite"}</span>
+                  </button>
+                ) : undefined
+              }
+              priority
+              sizes="92vw"
+              src={activeImage}
+            />
+          </div>
+        </div>
       </div>
 
       <footer className="artifact-view-caption">

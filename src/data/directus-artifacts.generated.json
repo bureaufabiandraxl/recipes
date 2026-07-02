@@ -7,6 +7,16 @@
     "description": "Ein ausgeschnittener Packungsrücken mit Eierlikörkuchen-Rezept, als Küchenfundstück eingeklebt.",
     "caption": "Beispiel-Artefakt: Backpulver-Packung mit Eierlikörkuchen-Rezept.",
     "image": "/images/directus/a223ed47-96b4-4626-87f3-5b848c1904b2.png",
+    "size": "S"
+  },
+  {
+    "id": "becherkuchen-lara",
+    "registerLetter": "B",
+    "type": "originalrezept_bild",
+    "title": "Becherkuchen à la Lara ",
+    "description": "Becherkuchen Lara",
+    "caption": "Becherkuchen à la Lara",
+    "image": "/images/directus/18a5e111-2985-4b8a-987a-02012eeaa413.jpg",
     "size": "M"
   },
   {
@@ -16,8 +26,8 @@
     "title": "Dialektlexikon",
     "description": "Dialektlexikon",
     "caption": "Dialekte",
-    "image": "/images/directus/f2317774-1a23-4153-96da-f96a9449066c.png",
-    "size": "M"
+    "image": "/images/directus/4861914f-94e2-4aba-92b4-8e7b5e01364d.png",
+    "size": "XL"
   },
   {
     "id": "diverse-saucen",
@@ -26,28 +36,28 @@
     "title": "Diverse Saucen",
     "description": "Diverse Saucen",
     "caption": "Diverse Saucen",
-    "image": "/images/directus/c2215789-994d-4bc2-93f3-64ea1f575a4d.png",
-    "size": "M"
-  },
-  {
-    "id": "etiketten",
-    "registerLetter": "M",
-    "type": "fundstueck",
-    "title": "Etiketten",
-    "description": "Wofür die wohl in der Vergangenheit, gebraucht worden sind?",
-    "caption": "Etiketten",
-    "image": "/images/directus/bf8d4d6f-810a-49e0-86dd-e8ebb4812811.png",
-    "size": "M"
+    "image": "/images/directus/ec4339d6-5a9b-4b06-9392-677ea12ad7cd.png",
+    "size": "XL"
   },
   {
     "id": "etiketten-1",
     "registerLetter": "E",
     "type": "fundstueck",
     "title": "Etiketten",
-    "description": "Etiketten",
+    "description": "Diese Etiketten habe ich lose im Rezeptbuch gefunden. Für welche Köstlichkeiten sie wohl gedacht waren?",
     "caption": "Etiketten",
     "image": "/images/directus/30514367-ef60-44f5-81dc-3b0382aebfb3.png",
     "secondaryImage": "/images/directus/afe5d530-8abc-4d96-b57a-576a7846d86d.png",
+    "size": "L"
+  },
+  {
+    "id": "etiketten-2",
+    "registerLetter": "O",
+    "type": "fundstueck",
+    "title": "Etiketten",
+    "description": "Diese Etiketten habe ich lose im Rezeptbuch gefunden. Für welche Köstlichkeiten sie wohl gedacht waren? ",
+    "caption": "Etiketten",
+    "image": "/images/directus/afe5d530-8abc-4d96-b57a-576a7846d86d.png",
     "size": "L"
   },
   {
@@ -88,7 +98,7 @@
     "description": "Heringsalat",
     "caption": "Heringsalat",
     "image": "/images/directus/f753f801-af95-46dc-accf-abb06093d706.png",
-    "size": "M"
+    "size": "XL"
   },
   {
     "id": "jesus",
@@ -98,7 +108,7 @@
     "description": "Jesus",
     "caption": "Jesus",
     "image": "/images/directus/46a927d3-a4cc-4bd4-8ad7-82e4ecc26146.png",
-    "size": "M"
+    "size": "XL"
   },
   {
     "id": "kranzkuchen-1",
@@ -115,11 +125,11 @@
     "id": "lebkuchen-neuner",
     "registerLetter": "L",
     "type": "fundstueck",
-    "title": "Lebkuchen Neuner",
-    "description": "Lebkuchen Neuner",
+    "title": "Lebkuchen / Neuner",
+    "description": "Lebkuchen / Neuner",
     "caption": "Lebkuchen Neuner",
     "image": "/images/directus/ca692fa0-1e2f-4dce-bc68-801317382e08.png",
-    "size": "M"
+    "size": "S"
   },
   {
     "id": "lied-vom-frieden",
@@ -129,7 +139,7 @@
     "description": "Lied vom Frieden",
     "caption": "Lied vom Frieden",
     "image": "/images/directus/53092ea9-2b70-4160-bb90-cee2908c519b.png",
-    "size": "M"
+    "size": "XL"
   },
   {
     "id": "marianne-portrait",
@@ -159,7 +169,7 @@
     "description": "Melissen-Saft",
     "caption": "Melissen-Saft",
     "image": "/images/directus/26c11a26-2725-41a0-bddb-97d76e69d3de.png",
-    "size": "M"
+    "size": "L"
   },
   {
     "id": "milchverwertung-1",
@@ -195,13 +205,13 @@
   },
   {
     "id": "stangenbrote",
-    "registerLetter": "S",
+    "registerLetter": "St",
     "type": "fundstueck",
     "title": "Stangenbrote",
     "description": "Stangenbrote",
     "caption": "Stangenbrote",
     "image": "/images/directus/5c794a8f-c831-4e42-af1c-fe4f6fd488d4.png",
-    "size": "M"
+    "size": "XL"
   },
   {
     "id": "teig-rezepte-fundstueck",
@@ -256,11 +266,12 @@
   {
     "id": "zukkinistrudel-mit-knoblauchsosse",
     "registerLetter": "Z",
-    "type": "fundstueck",
+    "type": "originalrezept_bild",
     "title": "Zukkinistrudel mit Knoblauchsoße",
     "description": "Zukkinistrudel mit Knoblauchsoße",
     "caption": "Zukkinistrudel mit Knoblauchsoße",
+    "captionLink": "Ruth",
     "image": "/images/directus/682b2b06-1375-4afd-89a6-9e67e6d61c5c.png",
-    "size": "M"
+    "size": "XL"
   }
 ]
